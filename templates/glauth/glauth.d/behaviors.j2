@@ -1,0 +1,10 @@
+
+[behaviors]
+  IgnoreCapabilities    = {{ glauth_behaviors.ignore_capabilities | default('false') | bool | ternary('true', 'false') }}
+  LimitFailedBinds      = {{ glauth_behaviors.limit_failed_binds | default('false') | bool | ternary('true', 'false') }}
+  NumberOfFailedBinds   = {{ glauth_behaviors.number_of_failed_binds | int }}
+  PeriodOfFailedBinds   = {{ glauth_behaviors.period_of_failed_binds | int }}
+  BlockFailedBindsFor   = {{ glauth_behaviors.block_failed_binds_for | int }}
+  PruneSourceTableEvery = {{ glauth_behaviors.prune_source_table_every | int }}
+  PruneSourcesOlderThan = {{ glauth_behaviors.prune_sources_older_than | int }}
+

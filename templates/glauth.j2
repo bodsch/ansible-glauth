@@ -1,0 +1,30 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+OPTIONS="
+{% if glauth_service is defined %}
+{% endif %}
+  --config {{ glauth_config_dir }}/glauth.conf
+"
+
+{#
+# glauth --help
+glauth: securely expose your LDAP for external auth
+
+Usage:
+  glauth [options] -c <file|s3 url>
+  glauth -h --help
+  glauth --version
+
+Options:
+  -c, --config <file>       Config file.
+  -K <aws_key_id>           AWS Key ID.
+  -S <aws_secret_key>       AWS Secret Key.
+  -r <aws_region>           AWS Region [default: us-east-1].
+  --ldap <address>          Listen address for the LDAP server.
+  --ldaps <address>         Listen address for the LDAPS server.
+  --ldaps-cert <cert-file>  Path to cert file for the LDAPS server.
+  --ldaps-key <key-file>    Path to key file for the LDAPS server.
+  -h, --help                Show this screen.
+  --version                 Show version.
+#}

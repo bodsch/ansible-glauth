@@ -1,0 +1,26 @@
+---
+
+- name: restart glauth
+  become: true
+  service:
+    name: glauth
+    state: restarted
+
+- name: reload glauth
+  become: true
+  service:
+    name: glauth
+    state: reloaded
+
+- name: validate config
+  command: /bin/true
+
+- name: daemon-reload
+  become: true
+  systemd:
+    daemon_reload: true
+    force: true
+  when:
+    - ansible_service_mgr | lower == "systemd"
+
+...

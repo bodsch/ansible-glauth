@@ -1,0 +1,8 @@
+
+{% if glauth_config.ldap is defined %}
+[ldap]
+  {% if glauth_config.ldap.enabled is defined %}
+  enabled = {{ glauth_config.ldap.enabled | bool | ternary('true', 'false') }}
+  listen  = "{{ glauth_config.ldap.listen.address | default('0.0.0.0') }}:{{ glauth_config.ldap.listen.port | default('389') }}"
+  {% endif %}
+{% endif %}

@@ -1,0 +1,14 @@
+
+watchconfig = true
+{% if glauth_config.debug is defined %}
+debug       = {{ glauth_config.debug | bool | ternary('true', 'false') }}
+{% endif %}
+{% if glauth_config.syslog is defined %}
+syslog      = {{ glauth_config.syslog | bool | ternary('true', 'false') }}
+{% endif %}
+{% if glauth_config.yubikey is defined and
+      glauth_config.yubikey.clientid | default('') | string | length > 0 and
+      glauth_config.yubikey.secret | default('') | string | length > 0 %}
+yubikeyclientid = {{ glauth_config.yubikey.clientid  }}
+yubikeysecret   = {{ glauth_config.yubikey.secret }}
+{% endif %}

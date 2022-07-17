@@ -1,0 +1,28 @@
+---
+
+galaxy_info:
+  role_name: glauth
+  namespace: bodsch
+
+  author: Bodo Schulz
+  description: ansible role to setup glauth
+  license: Apache
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: ArchLinux
+    - name: Debian
+      versions:
+        # 10
+        - buster
+        # 11
+        - bullseye
+
+  galaxy_tags:
+    - glauth
+    - ldap
+    - authentication
+
+dependencies: []
+
+...

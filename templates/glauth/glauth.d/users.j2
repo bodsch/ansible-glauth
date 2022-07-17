@@ -1,0 +1,50 @@
+
+{% if glauth_users is defined %}
+  {% for user, values in glauth_users.items() %}
+[[users]]
+  name          = "{{ user }}"
+    {% if values.uid | default('') | int > 0  %}
+  uidnumber     = {{ values.uid | int }}
+    {% endif %}
+    {% if values.primary_group | default('') | int > 0  %}
+  primarygroup  = {{ values.primary_group | int }}
+    {% endif %}
+    {% if values.other_groups | default([]) | count > 0 %}
+  othergroups     = [
+    {{ values.other_groups | join(",\n") | indent(4) }}
+  ]
+    {% endif %}
+    {% if values.given_name | default('') | string | length > 0 %}
+  givenname     = "{{ values.given_name }}"
+    {% endif %}
+    {% if values.sn | default('') | string | length > 0 %}
+  sn            = "{{ values.sn }}"
+    {% endif %}
+    {% if values.mail | default('') | string | length > 0 %}
+  mail          = "{{ values.mail }}"
+    {% endif %}
+    {% if values.pass.sha256 | default('') | string | length > 0 %}
+  passsha256    = "{{ values.pass.sha256 }}"
+    {% endif %}
+    {% if values.pass.sha256_apps | default([]) | count > 0 %}
+  passappsha256 = [
+    "{{ values.pass.sha256_apps | join("\",\n\"") | indent(4) }}"
+  ]
+    {% endif %}
+    {% if values.ssh_keys | default([]) | count > 0 %}
+  sshkeys       = [
+    "{{ values.ssh_keys | join("\",\n\"") | indent(4) }}"
+  ]
+    {% endif %}
+
+    {% if values.capabilities is defined and
+          values.capabilities | count > 0 %}
+      {% for cap, obj in values.capabilities.items() %}
+  [[users.capabilities]]
+    action = "{{ cap }}"
+    object = "{{ obj.object }}"
+      {% endfor %}
+    {% endif %}
+
+  {% endfor %}
+{% endif %}

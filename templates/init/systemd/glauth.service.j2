@@ -1,0 +1,23 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description      = glauth, a lightweight LDAP server for development, home use, or CI
+After            = network-online.target
+
+[Service]
+Type             = simple
+Environment      = "GOMAXPROCS={{ ansible_processor_vcpus | default(ansible_processor_count) }}"
+EnvironmentFile  = {{ glauth_defaults_directory }}/glauth
+
+User             = {{ glauth_system_user }}
+Group            = {{ glauth_system_group }}
+
+ExecReload       = /bin/kill -HUP $MAINPID
+ExecStart        = /usr/bin/glauth $OPTIONS
+
+LimitNOFILE      = 65000
+SyslogIdentifier = glauth
+Restart          = on-failure
+
+[Install]
+WantedBy         = multi-user.target

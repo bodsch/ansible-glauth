@@ -1,0 +1,43 @@
+---
+
+# - block:
+#     - name: get checksum list
+#       set_fact:
+#         __glauth_checksums: "{{ lookup('url', 'https://github.com/glauth/glauth/releases/download/v' + glauth_version + '/sha256sums.txt', wantlist=True) | list }}"
+#       run_once: true
+#
+#     - name: get checksum for {{ go_arch }} architecture
+#       set_fact:
+#         __glauth_checksum: "{{ __glauth_checksums | glauth_checksum('linux', go_arch) }}"
+#   delegate_to: localhost
+
+# https://github.com/glauth/glauth/releases/download/v2.1.0/linuxamd64.zip
+# https://github.com/glauth/glauth/releases/download/v2.1.0/glauthamd64.zip
+
+- name: d
+  debug:
+    msg: "{{ glauth_release_download_url }}/download/v{{ glauth_version }}/{{ ansible_facts.system }}{{ system_architecture }}.zip"
+
+- name: download glauth binary archive
+  become: false
+  delegate_to: "{{ glauth_delegate_to }}"
+  get_url:
+    url: "{{ glauth_release_download_url }}/download/v{{ glauth_version }}/{{ ansible_facts.system }}{{ system_architecture }}.zip"
+    dest: "{{ glauth_local_tmp_directory }}/glauth-{{ system_architecture }}.zip"
+    # checksum: "sha256:{{ __glauth_checksum }}"
+  register: _download_archive
+  until: _download_archive is succeeded
+  retries: 5
+  delay: 2
+  check_mode: false
+
+- name: extract glauth archive
+  become: false
+  delegate_to: "{{ glauth_delegate_to }}"
+  unarchive:
+    src: "{{ glauth_local_tmp_directory }}/glauth-{{ system_architecture }}.zip"
+    dest: "{{ glauth_local_tmp_directory }}"
+    copy: false
+  register: _extract_archive
+
+...

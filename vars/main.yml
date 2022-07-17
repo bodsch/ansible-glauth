@@ -1,0 +1,171 @@
+---
+
+glauth_main_version: "{{ glauth_version[0:3] }}"
+
+glauth_install_path: /usr/local/bin/glauth/{{ glauth_version }}
+
+glauth_delegate_to: localhost
+
+glauth_local_tmp_directory: "{{
+  lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
+  default(lookup('env', 'HOME') ~ '/.cache/ansible/glauth', true) }}/{{ glauth_version }}"
+
+glauth_requirements:
+  - iproute2
+  - gzip
+
+# ----------------------------------------------------------------------------------------
+
+glauth_defaults_service:
+  aws:
+    key_id: ""
+    secret_key: ""
+    region: ""
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file:
+    key_file:
+
+# https://github.com/glauth/glauth/blob/master/v2/pkg/config/config.go
+
+glauth_defaults_config:
+  debug: false
+  syslog: false
+  watch_config: true
+  config_file: ""
+
+  yubikey:
+    clientid: ""
+    secret: ""
+
+  aws:
+    access_key_id: ""
+    secret_access_key: ""
+    region: ""
+
+  ldap:
+    enabled: true
+    listen:
+      address: "0.0.0.0"
+      port: "389"
+
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "certs/server.crt"
+      key_file: "certs/server.key"
+
+glauth_defaults_backends: {}
+#   config:
+#     base_dn: "dc=glauth,dc=com"
+#     name_format: "cn"
+#     group_format: "ou"
+#     insecure: true
+#     servers: []
+#     sshkeyattr: ""
+#     use_graph_api: false
+#     plugin: ""
+#     plugin_handler: ""
+#     database: ""
+#     anonymous_dse: ""
+#   sqlite:
+#     base_dn:
+#     database: ""
+#   mysql:
+#     database: "glauth:glauth@tcp(192.168.1.22:3306)/glauth"
+#   postgres:
+#     database: "host=192.168.1.22 port=5432 dbname=glauth user=glauth password=glauth sslmode=disable"
+#   ldap:
+#     servers:
+#       - "ldaps://server1:636"
+#       - "ldaps://server2:636"
+#     # Ignore SSL certificate errors when connecting to backend LDAP servers.
+#     insecure: true
+#   plugin: {}
+
+glauth_defaults_frontends:
+  allowed_base_dn: ""
+  listen:
+    address: "0.0.0.0"
+    port: 0
+  tls:
+    enabled: false
+    cert_file: "certs/server.crt"
+    key_file: "certs/server.key"
+
+glauth_defaults_users: {}
+#   admin:
+#     enabled: true
+#     given_name: Admin
+#     sn: ""
+#     mail: ""
+#     uid: 6000
+#     primary_group: 6000
+#     other_groups: []
+#     pass:
+#       to create a passSHA256:   echo -n "mysecret" | openssl dgst -sha256
+#       sha256: ""
+#       sha256_apps: []
+#       bcrypt: ""
+#       bcrypt_apps: []
+#     ssh_keys: []
+#     otp_secret: ""
+#     yubikey: ""
+#     login_shell: ""
+#     home_dir: ""
+#     capabilities:
+#       search:
+#         object: ""
+#     custom_attrs: {}
+
+glauth_defaults_groups: {}
+
+glauth_defaults_behaviors:
+  ignore_capabilities: false
+  limit_failed_binds: true
+  number_of_failed_binds: 3
+  period_of_failed_binds: 10
+  block_failed_binds_for: 60
+  prune_source_table_every: 600
+  prune_sources_older_than: 600
+
+glauth_defaults_api:
+  enabled: false
+  listen:
+    address: "127.0.0.1"
+    port: "5555"
+  tls:
+    enabled: false
+    cert_file: "certs/server.crt"
+    key_file: "certs/server.key"
+  internals: true
+  secret_token: ""
+
+glauth_defaults_helper:
+  enabled: true
+  base_dn: ""
+  datastore: ""
+  plugin: ""          # Path to plugin library, for plugin backend only
+  plugin_handler: ""  # Name of plugin's main handler function
+  database: ""        # For MySQL backend only TODO REname to match plugin
+
+# ----------------------------------------------------------------------------------------
+
+glauth_defaults_directory: /etc/default
+
+go_arch_map:
+  x86_64: 'amd64'
+  aarch64: 'arm64'
+  armv7l: 'armv7'
+  armv6l: 'armv6'
+
+system_architecture: "{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}"
+
+systemd_lib_directory: /lib/systemd/system
+
+...

@@ -1,0 +1,8 @@
+---
+
+- name: snakeoil
+  src: https://github.com/bodsch/ansible-snakeoil.git
+  scm: git
+  version: 1.2.4
+
+...

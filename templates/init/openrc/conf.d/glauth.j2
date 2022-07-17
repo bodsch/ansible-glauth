@@ -1,0 +1,89 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+
+# GOMAXPROCS={{ ansible_processor_vcpus | default(ansible_processor_count) }}
+
+{% set attr_features = [
+  "expand-external-labels", "remote-write-receiver",
+  "exemplar-storage", "memory-snapshot-on-shutdown",
+  "extra-scrape-metrics", "new-service-discovery-manager",
+  "agent", "promql-per-step-stats",
+  "auto-gomaxprocs" ] %}
+
+command_args="
+{% if glauth_service is defined %}
+  {# log configuration #}
+  --log.level={{ glauth_service.log.level | default('info') }} \
+  {% if glauth_service.log.format is defined and
+        glauth_service.log.format in ["logfmt", "json"] %}
+  --log.format={{glauth_service.log.format }} \
+  {% endif %}
+  {# storage configuration #}
+  {% if glauth_service.storage.tsdb.path is defined %}
+  --storage.tsdb.path={{ glauth_service.storage.tsdb.path }} \
+  {% endif %}
+  {% if glauth_version is version('2.7.0', '>=') %}
+    {% if glauth_service.storage.tsdb.retention.time is defined and
+          glauth_service.storage.tsdb.retention.time | string | length > 0 %}
+  --storage.tsdb.retention.time={{ glauth_service.storage.tsdb.retention.time }} \
+    {% endif %}
+    {% if glauth_service.storage.tsdb.retention.size is defined and
+          glauth_service.storage.tsdb.retention.size | string | length > 0 %}
+  --storage.tsdb.retention.size={{ glauth_service.storage.tsdb.retention.size }} \
+    {% endif %}
+  {% else %}
+    {% if glauth_service.storage.tsdb.retention is defined and
+          not glauth_service.storage.tsdb.retention | type == "dict" %}
+  --storage.tsdb.retention={{ glauth_service.storage.tsdb.retention }} \
+    {% endif %}
+  {% endif %}
+  {% if glauth_version is version('2.24.0', '>=') and
+        glauth_service.web.config.file is defined and
+        glauth_service.web.config.file | string | length > 0 %}
+    --web.config.file={{ glauth_config_dir }}/{{ glauth_service.web.config.file | default('web.yml') }} \
+  {% endif %}
+  {# web configuration #}
+  --web.console.libraries={{ glauth_config_dir }}/console_libraries \
+  --web.console.templates={{ glauth_config_dir }}/consoles \
+  {% if glauth_service.web.listen_address is defined and
+        glauth_service.web.listen_address | string | length > 0 %}
+  --web.listen-address={{ glauth_service.web.listen_address }} \
+  {% endif %}
+  {% if glauth_service.web.external_url is defined and
+        glauth_service.web.external_url | string | length > 0 %}
+  --web.external-url={{ glauth_service.web.external_url }} \
+  {% endif %}
+  {% if glauth_service.web.enable_admin_api is defined and
+        glauth_service.web.enable_admin_api %}
+  --web.enable-admin-api \
+  {# feature configuration #}
+  {% endif %}
+  {% if glauth_service.features is defined and
+        glauth_service.features | type == "list" and
+        glauth_service.features | count > 0 and
+        glauth_service.features in attr_features %}
+  --enable-feature={{ glauth_service.features | join(', ') }}
+  {% endif %}
+  {% if glauth_service.raw_flags is defined %}
+    {% for flag, flag_value in glauth_service.raw_flags.items() %}
+      {% if not flag_value %}
+  --{{ flag }} \
+      {% elif flag_value is string %}
+  --{{ flag }}={{ flag_value }} \
+      {% elif flag_value is sequence %}
+        {% for flag_value_item in flag_value %}
+  --{{ flag }}={{ flag_value_item }} \
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endif %}
+  --config.file={{ glauth_config_dir }}/glauth.yml
+"
+
+# command_args="
+#   --config.file=/etc/glauth/glauth.yml
+#   --storage.tsdb.retention.time=365d
+#   --storage.tsdb.path=/var/lib/glauth/data
+#   --web.listen-address="0.0.0.0:9090"
+#   --web.enable-admin-api"

@@ -1,0 +1,26 @@
+
+{% if glauth_backends is defined %}
+  {% set _supported_datastores = [ "config" ] %}
+  {% for datastore, values in glauth_backends.items() %}
+    {% if not datastore in _supported_datastores %}
+  # sorry, the datastore '{{ datastore }}' is currently not supported!
+  # please create an issue under https://github.com/bodsch/ansible-glauth/issues,
+  # if you want to use this datastore!
+    {% else %}
+[[backends]]
+  datastore   = "{{ datastore }}"
+      {% if values.base_dn | default('') | string | length > 0 %}
+  baseDN      = "{{ values.base_dn | default('') }}"
+      {% endif %}
+      {% if values.name_format | default('') | string | length > 0 %}
+  nameformat  = "{{ values.name_format | default('') }}"
+      {% endif %}
+      {% if values.group_format | default('') | string | length > 0 %}
+  groupformat = "{{ values.group_format | default('') }}"
+      {% endif %}
+      {% if values.sshkey_attr | default('') | string | length > 0 %}
+  sshkeyattr  = "{{ values.sshkey_attr }}"
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}

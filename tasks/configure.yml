@@ -1,0 +1,34 @@
+---
+
+- name: create glauth configuration directory
+  file:
+    path: "{{ glauth_config_dir }}"
+    state: directory
+    owner: root
+    group: "{{ glauth_system_group }}"
+    mode: 0770
+
+- name: create certificate directory
+  file:
+    path: "{{ glauth_config_dir }}/certs"
+    state: directory
+    owner: "{{ glauth_system_user }}"
+    group: "{{ glauth_system_group }}"
+    mode: 0770
+
+- name: create glauth.yml
+  template:
+    src: "glauth/glauth.conf.j2"
+    dest: "{{ glauth_config_dir }}/glauth.conf"
+    force: true
+    owner: root
+    group: "{{ glauth_system_group }}"
+    mode: 0640
+  notify:
+    - validate config
+    - reload glauth
+
+- name: restart glauth if needed
+  meta: flush_handlers
+
+...
