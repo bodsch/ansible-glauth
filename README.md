@@ -51,6 +51,187 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 
 ```
 
+### `glauth_service`
+
+| parameter | glauth version | type    | default | description |
+| :---      | :---           | :---    | :---    | :---        |
+| ``        | 2.5            | ``      | `-`     |             |
+| ``        | 2.5            | ``      | `-`     |             |
+| ``        | 2.5            | ``      | `-`     |             |
+| ``        | 2.5            | ``      | `-`     |             |
+| ``        | 2.5            | ``      | `-`     |             |
+
+```yaml
+glauth_service: {}
+```
+
+### `glauth_config`
+
+| parameter          | glauth version | type     | default | description |
+| :---               | :---           | :---     | :---    | :---        |
+| `debug`            | 2.5            | `bool`   | `false` |             |
+| `syslog`           | 2.5            | `bool`   | `true`  |             |
+| `watch_config`     | 2.5            | `bool`   | `true`  | Enable hot-reload of configuration on changes<br>**does NOT work [ldap], [ldaps], [backend] or [api] sections** |
+| `yubikey.clientid` | 2.5            | `string` | `-`     |             |
+| `yubikey.secret`   | 2.5            | `string` | `-`     |             |
+
+```yaml
+glauth_config: {}
+```
+
+### `glauth_backends`
+
+| parameter        | glauth version | type     | default | description |
+| :---             | :---           | :---     | :---    | :---        |
+| `base_dn`        | 2.5            | `string` | `-`     |             |
+| `name_format`    | 2.5            | `string` | `-`     |             |
+| `group_format`   | 2.5            | `string` | `-`     |             |
+| `insecure`       | 2.5            | `bool`   | `-`     |             |
+| `servers`        | 2.5            | `list`   | `-`     |             |
+| `sshkeyattr`     | 2.5            | `string` | `-`     |             |
+| `use_graph_api`  | 2.5            | `bool`   | `-`     |             |
+| `plugin`         | 2.5            | `string` | `-`     |             |
+| `plugin_handler` | 2.5            | `string` | `-`     |             |
+| `database`       | 2.5            | `string` | `-`     |             |
+| `anonymous_dse`  | 2.5            | `string` | `-`     |             |
+
+
+```yaml
+glauth_backends:
+  config:
+    base_dn: "dc=molecule,dc=lan"
+    name_format: "cn"
+    group_format: "ou"
+```
+
+### `glauth_frontends`
+
+| parameter         | glauth version | type      | default  | description |
+| :---              | :---           | :---      | :---     | :---        |
+| `allowed_base_dn` | 2.5            | `string`  | `-`      |             |
+| `listen.address`  | 2.5            | `string`  | `0.0.0.0`|             |
+| `listen.port`     | 2.5            | `int`     | `5555`   |             |
+| `tls.enabled`     | 2.5            | `bool`    | `-`      |             |
+| `tls.cert_file`   | 2.5            | `string`  | `-`      |             |
+| `tls.key_file`    | 2.5            | `string`  | `-`      |             |
+
+```yaml
+glauth_frontends: {}
+```
+
+### `glauth_users`
+
+| parameter          | glauth version | type    | default | description |
+| :---               | :---           | :---    | :---    | :---        |
+| `enabled`          | 2.5            | ``      | `-`     |             |
+| `given_name`       | 2.5            | ``      | `-`     |             |
+| `sn`               | 2.5            | ``      | `-`     |             |
+| `mail`             | 2.5            | ``      | `-`     |             |
+| `uid`              | 2.5            | ``      | `-`     |             |
+| `primary_group`    | 2.5            | ``      | `-`     |             |
+| `other_groups`     | 2.5            | ``      | `-`     |             |
+| `pass.sha256`      | 2.5            | ``      | `-`     |             |
+| `pass.sha256_apps` | 2.5            | ``      | `-`     |             |
+| `pass.bcrypt`      | 2.5            | ``      | `-`     |             |
+| `pass.bcrypt_apps` | 2.5            | ``      | `-`     |             |
+| `ssh_keys`         | 2.5            | ``      | `-`     |             |
+| `otp_secret`       | 2.5            | ``      | `-`     |             |
+| `yubikey`          | 2.5            | ``      | `-`     |             |
+| `login_shell`      | 2.5            | ``      | `-`     |             |
+| `home_dir`         | 2.5            | ``      | `-`     |             |
+| `capabilities`     | 2.5            | ``      | `-`     |             |
+| `custom_attrs`     | 2.5            | ``      | `-`     |             |
+
+
+#### `capabilities`
+
+| parameter | glauth version | type    | default | description |
+| :---      | :---           | :---    | :---    | :---        |
+| `object`  | 2.5            | ``      | `-`     |             |
+
+#### `custom_attrs`
+
+| parameter | glauth version | type    | default | description |
+| :---      | :---           | :---    | :---    | :---        |
+| ``        | 2.5            | ``      | `-`     |             |
+| ``        | 2.5            | ``      | `-`     |             |
+
+
+```yaml
+glauth_users:
+  admin:
+    enabled: true
+    given_name: Admin
+    mail: "admin@matrix.lan"
+    uid: 6000
+    primary_group: 6000
+    other_groups: []
+    pass:
+      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
+    capabilities:
+      "*":
+        object: "dc=matrix,dc=lan"
+```
+
+### `glauth_groups`
+
+| parameter        | glauth version | type    | default | description |
+| :---             | :---           | :---    | :---    | :---        |
+| `gid`            | 2.5            | `int`   | `-`     |             |
+| `include_groups` | 2.5            | `list`  | `-`     |             |
+
+```yaml
+glauth_groups:
+  admins:
+    gid: 6000
+```
+
+### `glauth_behaviors`
+
+| parameter                   | glauth version | type    | default | description |
+| :---                        | :---           | :---    | :---    | :---        |
+| `ignore_capabilities`       | 2.5            | `bool`  | `false` | Ignore all capabilities restrictions, for instance allowing every user to perform a search |
+| `limit_failed_binds`        | 2.5            | `bool`  | `true`  | Enable a "fail2ban" type backoff mechanism temporarily banning repeated failed login attempts |
+| `number_of_failed_binds`    | 2.5            | `int`   | `3`     | How many failed login attempts are allowed before a ban is imposed |
+| `period_of_failed_binds`    | 2.5            | `int`   | `10`    | How long (in seconds) is the window for failed login attempts |
+| `block_failed_binds_for`    | 2.5            | `int`   | `60`    | How long (in seconds) is the ban duration |
+| `prune_source_table_every`  | 2.5            | `int`   | `600`   | Clean learnt IP addresses every N seconds |
+| `prune_sources_older_than`  | 2.5            | `int`   | `600`   | Clean learnt IP addresses not seen in N seconds |
+
+```yaml
+
+glauth_behaviors:
+  ignore_capabilities: false
+  limit_failed_binds: true
+  number_of_failed_binds: 3
+  period_of_failed_binds: 10
+  block_failed_binds_for: 60
+  prune_source_table_every: 600
+  prune_sources_older_than: 600
+```
+
+### `glauth_api`
+
+| parameter        | glauth version | type      | default     | description |
+| :---             | :---           | :---      | :---        | :---        |
+| `enabled`        | 2.5            | `bool`    | `false`     |             |
+| `internals`      | 2.5            | `bool`    | `true`      |             |
+| `listen.address` | 2.5            | `string`  | `127.0.0.1` |             |
+| `listen.port`    | 2.5            | `int`     | `5555`      |             |
+| `tls.cert_file`  | 2.5            | `string`  | `-`         |             |
+| `tls.key_file`   | 2.5            | `string`  | `-`         |             |
+| `secret_token`   | 2.5            | `string`  | `-`         |             |
+
+```yaml
+glauth_api:
+  enabled: true
+  listen:
+    address: "0.0.0.0"
+```
+
+
+
+
 ---
 
 ## Author and License
