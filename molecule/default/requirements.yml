@@ -1,8 +1,10 @@
 ---
 
 - name: snakeoil
-  src: https://github.com/bodsch/ansible-snakeoil.git
-  scm: git
+  src: bodsch.snakeoil
   version: 1.2.4
+
+- name: syslog-ng
+  src: bodsch.syslog_ng
 
 ...

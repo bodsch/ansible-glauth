@@ -6,7 +6,7 @@
     state: directory
     owner: root
     group: "{{ glauth_system_group }}"
-    mode: 0770
+    mode: 0775
 
 - name: create certificate directory
   file:
@@ -16,14 +16,14 @@
     group: "{{ glauth_system_group }}"
     mode: 0770
 
-- name: create glauth.yml
+- name: create glauth.conf
   template:
     src: "glauth/glauth.conf.j2"
     dest: "{{ glauth_config_dir }}/glauth.conf"
     force: true
     owner: root
     group: "{{ glauth_system_group }}"
-    mode: 0640
+    mode: 0664
   notify:
     - validate config
     - reload glauth

@@ -33,7 +33,7 @@
       file:
         state: directory
         path: "{{ glauth_install_path }}/plugins"
-        mode: 0750
+        mode: 0755
         owner: "{{ glauth_system_user }}"
         group: "{{ glauth_system_group }}"
 

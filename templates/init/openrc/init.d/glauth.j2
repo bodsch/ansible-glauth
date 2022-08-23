@@ -9,14 +9,22 @@ user=${user:-${SVCNAME}}
 group=${group:-${SVCNAME}}
 
 command="/usr/bin/glauth"
-command_args="${command_args:--config=/etc/glauth/glauth.yml}"
+supervisor="supervise-daemon"
+
+command_args="${command_args:--config=/etc/glauth/glauth.conf}"
 command_user="${user}:${group}"
+
+command_args_background="--background"
+required_files="/etc/glauth/glauth.conf"
+
 output_log="/var/log/${RC_SVCNAME}/${RC_SVCNAME}.log"
 error_log="${output_log}"
 extra_started_commands="reload"
 
 depend() {
-  after net
+  # need localmount net
+  # use dns
+  after sysfs net
 }
 
 start_pre() {
@@ -25,31 +33,33 @@ start_pre() {
   chown -R ${command_user} /var/lib/glauth/
 }
 
-start() {
-  ebegin "Starting ${SVCNAME}"
+# start() {
+#   ebegin "Starting ${SVCNAME}"
+#
+#   start-stop-daemon \
+#     --start \
+#     --background \
+#     --exec "${command}" \
+#     --stdout ${output_log} \
+#     --stderr ${error_log} \
+#     --make-pidfile \
+#     --pidfile ${pidfile} \
+#     --user ${command_user} \
+#     -- ${command_args}
+#
+#   pidof glauth > "${pidfile}"
+#
+#   eend $? "Failed to start ${SVCNAME}"
+# }
 
-  start-stop-daemon --start \
-    --background \
-    --exec "${command}" \
-    --stdout ${output_log} \
-    --stderr ${error_log} \
-    --pidfile ${pidfile} \
-    --user ${command_user} \
-    -- ${command_args}
-
-  pidof glauth > "${pidfile}"
-
-  eend $? "Failed to start ${SVCNAME}"
-}
-
-stop() {
-  ebegin "Stopping ${SVCNAME}"
-  start-stop-daemon --stop \
-    --pidfile "${pidfile}"
-
-  eend $? "Failed to stop ${SVCNAME}"
-}
-
+# stop() {
+#   ebegin "Stopping ${SVCNAME}"
+#   start-stop-daemon \
+#     --stop \
+#     --pidfile "${pidfile}"
+#
+#   eend $? "Failed to stop ${SVCNAME}"
+# }
 
 reload() {
   ebegin "Reloading ${SVCNAME}"
