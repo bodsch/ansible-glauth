@@ -3,13 +3,13 @@
 # Copyright 2016-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-description="Prometheus monitoring system and time series database"
+description="glauth, a lightweight LDAP server for development, home use, or CI"
 pidfile=${pidfile:-"/run/${RC_SVCNAME}.pid"}
 user=${user:-${SVCNAME}}
 group=${group:-${SVCNAME}}
 
 command="/usr/bin/glauth"
-command_args="${command_args:--config.file=/etc/glauth/glauth.yml --storage.tsdb.path=/var/lib/glauth/data}"
+command_args="${command_args:--config=/etc/glauth/glauth.yml}"
 command_user="${user}:${group}"
 output_log="/var/log/${RC_SVCNAME}/${RC_SVCNAME}.log"
 error_log="${output_log}"
@@ -19,36 +19,14 @@ depend() {
   after net
 }
 
-configtest() {
-  ebegin "Checking glauth' configuration"
-
-  promtool check config /etc/glauth/glauth.yml
-
-  if [ $? -gt 0 ]; then
-    eend $? "failed, please correct errors above"
-  fi
-}
-
 start_pre() {
-  if [ "${RC_CMD}" != "restart" ]; then
-          configtest || return 1
-  fi
-
   [ -d $(dirname ${output_log}) ] ||  mkdir $(dirname ${output_log})
   chown -R ${command_user} $(dirname ${output_log})
   chown -R ${command_user} /var/lib/glauth/
 }
 
-stop_pre() {
-  if [ "${RC_CMD}" = "restart" ]; then
-    configtest || return 1
-  fi
-}
-
 start() {
   ebegin "Starting ${SVCNAME}"
-
-#     --chdir /usr/share/glauth/web/ui/ \
 
   start-stop-daemon --start \
     --background \
@@ -76,7 +54,7 @@ stop() {
 reload() {
   ebegin "Reloading ${SVCNAME}"
   if [ ! -r "${pidfile}" ]; then
-    eend 1 "automount not running"
+    eend 1 "${RC_SVCNAME} not running"
   else
     kill -s HUP $(cat "${pidfile}") 2> /dev/null
     eend $?

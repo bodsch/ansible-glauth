@@ -1,9 +1,5 @@
 ---
 
-- name: d
-  debug:
-    msg: "{{ glauth_local_tmp_directory }}/glauth"
-
 - name: detect binary file for glauth
   become: false
   delegate_to: "{{ glauth_delegate_to }}"

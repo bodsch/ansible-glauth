@@ -11,13 +11,6 @@
 #         __glauth_checksum: "{{ __glauth_checksums | glauth_checksum('linux', go_arch) }}"
 #   delegate_to: localhost
 
-# https://github.com/glauth/glauth/releases/download/v2.1.0/linuxamd64.zip
-# https://github.com/glauth/glauth/releases/download/v2.1.0/glauthamd64.zip
-
-- name: d
-  debug:
-    msg: "{{ glauth_release_download_url }}/download/v{{ glauth_version }}/{{ ansible_facts.system }}{{ system_architecture }}.zip"
-
 - name: download glauth binary archive
   become: false
   delegate_to: "{{ glauth_delegate_to }}"

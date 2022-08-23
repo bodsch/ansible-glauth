@@ -25,31 +25,32 @@ def pp_json(json_thing, sort=True, indents=2):
 
 
 def base_directory():
-    """ ... """
+    """
+    """
     cwd = os.getcwd()
 
-    if('group_vars' in os.listdir(cwd)):
+    if 'group_vars' in os.listdir(cwd):
         directory = "../.."
         molecule_directory = "."
     else:
         directory = "."
-        molecule_directory = "molecule/{}".format(os.environ.get('MOLECULE_SCENARIO_NAME'))
+        molecule_directory = f"molecule/{os.environ.get('MOLECULE_SCENARIO_NAME')}"
 
     return directory, molecule_directory
 
 
 def read_ansible_yaml(file_name, role_name):
-    ext_arr = ["yml", "yaml"]
-
+    """
+    """
     read_file = None
 
-    for e in ext_arr:
+    for e in ["yml", "yaml"]:
         test_file = "{}.{}".format(file_name, e)
         if os.path.isfile(test_file):
             read_file = test_file
             break
 
-    return "file={} name={}".format(read_file, role_name)
+    return f"file={read_file} name={role_name}"
 
 
 @pytest.fixture()
@@ -63,21 +64,22 @@ def get_vars(host):
     """
     base_dir, molecule_dir = base_directory()
     distribution = host.system_info.distribution
+    operation_system = None
 
     if distribution in ['debian', 'ubuntu']:
-        os = "debian"
+        operation_system = "debian"
     elif distribution in ['redhat', 'ol', 'centos', 'rocky', 'almalinux']:
-        os = "redhat"
-    elif distribution in ['arch']:
-        os = "archlinux"
+        operation_system = "redhat"
+    elif distribution in ['arch', 'artix']:
+        operation_system = f"{distribution}linux"
 
     # print(" -> {} / {}".format(distribution, os))
     # print(" -> {}".format(base_dir))
 
-    file_defaults      = read_ansible_yaml("{}/defaults/main".format(base_dir), "role_defaults")
-    file_vars          = read_ansible_yaml("{}/vars/main".format(base_dir), "role_vars")
-    file_distibution   = read_ansible_yaml("{}/vars/{}".format(base_dir, os), "role_distibution")
-    file_molecule      = read_ansible_yaml("{}/group_vars/all/vars".format(molecule_dir), "test_vars")
+    file_defaults      = read_ansible_yaml(f"{base_dir}/defaults/main", "role_defaults")
+    file_vars          = read_ansible_yaml(f"{base_dir}/vars/main", "role_vars")
+    file_distibution   = read_ansible_yaml(f"{base_dir}/vars/{operation_system}", "role_distibution")
+    file_molecule      = read_ansible_yaml(f"{molecule_dir}/group_vars/all/vars", "test_vars")
     # file_host_molecule = read_ansible_yaml("{}/host_vars/{}/vars".format(base_dir, HOST), "host_vars")
 
     defaults_vars      = host.ansible("include_vars", file_defaults).get("ansible_facts").get("role_defaults")
@@ -119,6 +121,12 @@ def test_directories(host, dirs):
 def test_files(host, get_vars):
     """
     """
+    distribution = host.system_info.distribution
+    release = host.system_info.release
+
+    print(f"distribution: {distribution}")
+    print(f"release     : {release}")
+
     version = local_facts(host).get("version")
 
     install_dir = get_vars.get("glauth_install_path")
@@ -132,11 +140,11 @@ def test_files(host, get_vars):
     files.append("/usr/bin/glauth")
 
     if install_dir:
-        files.append("{}/glauth".format(install_dir))
-    if defaults_dir:
-        files.append("{}/glauth".format(defaults_dir))
+        files.append(f"{install_dir}/glauth")
+    if defaults_dir and not distribution == "artix":
+        files.append(f"{defaults_dir}/glauth")
     if config_dir:
-        files.append("{}/glauth.conf".format(config_dir))
+        files.append(f"{config_dir}/glauth.conf")
 
     print(files)
 
@@ -169,5 +177,5 @@ def test_open_port(host, get_vars):
     """
     listen_address = "0.0.0.0:389"
 
-    service = host.socket("tcp://{0}".format(listen_address))
+    service = host.socket(f"tcp://{listen_address}")
     assert service.is_listening
