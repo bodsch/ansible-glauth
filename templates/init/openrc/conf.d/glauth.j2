@@ -8,7 +8,6 @@ group="{{ glauth_system_group }}"
 
 command_args="
 {% if glauth_service is defined %}
-  --config {{ glauth_config_dir }}/glauth.conf
 {% endif %}
+  --config {{ glauth_config_dir }}/glauth.conf
 "
-

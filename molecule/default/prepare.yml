@@ -36,6 +36,5 @@
 
   roles:
     - role: syslog-ng
-    - role: snakeoil
 
 ...

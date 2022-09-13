@@ -1,10 +1,7 @@
 ---
 
-- name: snakeoil
-  src: bodsch.snakeoil
-  version: 1.2.4
-
 - name: syslog-ng
   src: bodsch.syslog_ng
+  version: 1.4.0
 
 ...

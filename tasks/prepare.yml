@@ -40,6 +40,9 @@
 
 - block:
     - name: get latest release
+      delegate_to: localhost
+      become: false
+      run_once: true
       uri:
         url: "https://api.github.com/repos/glauth/glauth/releases/latest"
         method: GET
