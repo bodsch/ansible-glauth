@@ -40,9 +40,6 @@
 
 - block:
     - name: get latest release
-      delegate_to: localhost
-      become: false
-      run_once: true
       uri:
         url: "https://api.github.com/repos/glauth/glauth/releases/latest"
         method: GET
@@ -60,6 +57,9 @@
     - name: set glauth version to {{ _latest_release.json.tag_name[1:] }}
       set_fact:
         glauth_version: "{{ _latest_release.json.tag_name[1:] }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
   when:
     - glauth_version == "latest"
 

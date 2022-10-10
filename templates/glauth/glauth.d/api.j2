@@ -1,5 +1,6 @@
 
 {% if glauth_api is defined %}
+{# https://glauth.github.io/docs/web-ui.html #}
 [api]
   enabled     = {{ glauth_api.enabled | default('false') | bool | ternary('true', 'false') }}
   listen      = "{{ glauth_api.listen.address | default('127.0.0.1') }}:{{ glauth_api.listen.port | default('5555') }}"

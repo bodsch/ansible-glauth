@@ -3,16 +3,16 @@
 - name: prepare
   include_tasks: prepare.yml
 
-- name: download
-  include_tasks: download.yml
-  when:
-    - not stat_glauth_binary.stat.exists
+#- name: download
+#  include_tasks: download.yml
+#  when:
+#    - not stat_glauth_binary.stat.exists
 
-- name: install
-  include_tasks: install.yml
+#- name: install
+#  include_tasks: install.yml
 
 - name: configure
-  include_tasks: configure.yml
+  include_tasks: configure/main.yml
 
 - name: service
   include_tasks: service.yml

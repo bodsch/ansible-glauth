@@ -1,0 +1,19 @@
+---
+
+- name: create sqlite backend
+  glauth_backend:
+    state: create
+    database_type: sqlite
+
+- name: import data into sqlite backend
+  glauth_backend_data:
+    # state: create
+    database_type: sqlite
+    groups: "{{ glauth_groups }}"
+    users: "{{ glauth_users }}"
+  when:
+    - (glauth_users is defined and
+       glauth_users | count > 0) or
+      (glauth_groups is defined and
+       glauth_groups | count > 0)
+...

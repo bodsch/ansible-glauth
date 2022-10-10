@@ -1,26 +1,56 @@
 
 {% if glauth_backends is defined %}
-  {% set _supported_datastores = [ "config" ] %}
+  {% set _supported_datastores = [ "config", "sqlite" ] %}
   {% for datastore, values in glauth_backends.items() %}
     {% if not datastore in _supported_datastores %}
   # sorry, the datastore '{{ datastore }}' is currently not supported!
   # please create an issue under https://github.com/bodsch/ansible-glauth/issues,
   # if you want to use this datastore!
     {% else %}
+      {% if datastore == "sqlite" %}
+        {% set plugin = datastore %}
+        {% set datastore = "plugin" %}
+      {% endif %}
 [[backends]]
-  datastore   = "{{ datastore }}"
+  datastore     = "{{ datastore }}"
+      {% if datastore == "plugin" %}
+  plugin        = "{{ glauth_data_dir }}/plugins/{{ plugin }}.so"
+  pluginhandler = "NewSQLiteHandler"
+  database      = "{{ glauth_data_dir }}/glauth.db"
+      {% endif %}
       {% if values.base_dn | default('') | string | length > 0 %}
-  baseDN      = "{{ values.base_dn | default('') }}"
+  baseDN        = "{{ values.base_dn }}"
       {% endif %}
       {% if values.name_format | default('') | string | length > 0 %}
-  nameformat  = "{{ values.name_format | default('') }}"
+  nameformat    = "{{ values.name_format }}"
       {% endif %}
       {% if values.group_format | default('') | string | length > 0 %}
-  groupformat = "{{ values.group_format | default('') }}"
+  groupformat   = "{{ values.group_format }}"
       {% endif %}
       {% if values.sshkey_attr | default('') | string | length > 0 %}
-  sshkeyattr  = "{{ values.sshkey_attr }}"
+  sshkeyattr    = "{{ values.sshkey_attr }}"
       {% endif %}
     {% endif %}
   {% endfor %}
+
 {% endif %}
+
+{#
+[backend]
+  datastore = "plugin"
+  plugin = "sqlite.so"
+  pluginhandler = "NewSQLiteHandler"
+  database = "path to your database file"
+
+[backend]
+  datastore = "plugin"
+  plugin = "mysql.so"
+  pluginhandler = "NewMySQLHandler"
+  database = "database connection string"
+
+[backend]
+  datastore = "plugin"
+  plugin = "postgres.so"
+  pluginhandler = "NewPostgresHandler"
+  database = "database connection string"
+#}

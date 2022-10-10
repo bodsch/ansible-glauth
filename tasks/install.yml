@@ -129,4 +129,44 @@
   when:
     - ansible_service_mgr | lower == "openrc"
 
+
+- name: python support
+  block:
+    - name: create requirements.txt
+      template:
+        src: requirements.txt.j2
+        dest: /tmp/glauth-requirements.txt
+        mode: 0660
+
+    - name: ensure python bindings for glauth packages 1st
+      pip:
+        requirements: /tmp/glauth-requirements.txt
+        state: present
+        executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+      register: pip_install
+      ignore_errors: true
+      no_log: true
+
+    - block:
+        - name: install build essentials
+          package:
+            name: "{{ glauth_build_packages }}"
+            state: present
+
+        - name: ensure python bindings for glauth packages 2nd
+          pip:
+            requirements: /tmp/glauth-requirements.txt
+            state: present
+            executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+
+        - name: uninstall build essentials
+          package:
+            name: "{{ glauth_build_packages }}"
+            state: absent
+      when:
+        - pip_install.failed
+  when:
+    - glauth_python_packages is defined
+    - glauth_python_packages | length > 0
+
 ...
