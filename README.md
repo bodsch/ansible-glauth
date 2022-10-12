@@ -145,11 +145,15 @@ glauth_frontends: {}
 
 #### `capabilities`
 
+[see upstream doku](https://glauth.github.io/docs/capabilities.html)
+
 | parameter | glauth version | type    | default | description |
 | :---      | :---           | :---    | :---    | :---        |
 | `object`  | 2.1            | ``      | `-`     |             |
 
 #### `custom_attrs`
+
+[see upstream doku](https://glauth.github.io/docs/custom-attributes.html)
 
 | parameter | glauth version | type    | default | description |
 | :---      | :---           | :---    | :---    | :---        |

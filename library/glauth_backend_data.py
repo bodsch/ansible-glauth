@@ -156,28 +156,46 @@ class GlAuthBackendData(object):
 
     def import_groups(self):
         """
+            CREATE TABLE IF NOT EXISTS groups (
+              id INTEGER PRIMARY KEY,
+              name TEXT NOT NULL,
+              gidnumber INTEGER NOT NULL
+            );
         """
-        # import sqlite3
-
-        self.module.log(msg=f"groups: {self.groups}'")
-
+        # self.module.log(msg=f"groups: {self.groups}'")
         for group, values in self.groups.items():
-            self.module.log(msg=f"  - group: {group}'")
+            """
+            """
+            self.module.log(msg=f"  - group: {group}")
 
+            gid = values.get('gid')
             include_groups = values.get("include_groups", [])
 
-            # CREATE TABLE IF NOT EXISTS groups (
-            #   id INTEGER PRIMARY KEY,
-            #   name TEXT NOT NULL,
-            #   gidnumber INTEGER NOT NULL
-            # );
-            query = f"insert or replace into groups (`name`, `gidnumber`) values ('{group}', '{values.get('gid')}')"
-            self.module.log(msg=f"  - query: {query}'")
+            group_exists, error, existing_groupid, error_message = self.__check_database_value('groups', 'name', group)
 
-            result, last_inserted_id, msg = self.__execute_query(query)
 
-            if result:
-                if len(include_groups) > 0 and last_inserted_id:
+            if group_exists:
+                """
+                  update
+                """
+                query = f"update groups set gidnumber = {gid} where name = '{group}'"
+                success, _, msg = self.__execute_query(query)
+
+            else:
+                """
+                  insert
+                """
+                # success, msg = self.__insert_user(user, values)
+                query = f"insert or replace into groups (`name`, `gidnumber`) values ('{group}', '{gid}')"
+                success, last_inserted_id, msg = self.__execute_query(query)
+
+                existing_groupid = last_inserted_id
+
+            if success:
+                query = f"delete from includegroups where parentgroupid = {existing_groupid}"
+                success, _, msg = self.__execute_query(query)
+
+                if len(include_groups) > 0 and existing_groupid:
                     # CREATE TABLE IF NOT EXISTS includegroups (
                     #   id INTEGER PRIMARY KEY,
                     #   parentgroupid INTEGER NOT NULL,
@@ -186,44 +204,43 @@ class GlAuthBackendData(object):
                     for include_group in include_groups:
                         """
                         """
-                        query = f"insert or replace into includegroups (`parentgroupid`, `includegroupid`) values('{last_inserted_id}', '{include_group}')"
+                        query = f"insert into includegroups (`parentgroupid`, `includegroupid`) values('{existing_groupid}', '{include_group}')"
                         self.module.log(msg=f"  - query: {query}'")
 
                         result, last_inserted_id, msg = self.__execute_query(query)
 
-        pass
-
 
     def import_users(self):
         """
+          CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            uidnumber INTEGER NOT NULL,
+            primarygroup INTEGER NOT NULL,
+            othergroups TEXT DEFAULT '',
+            givenname TEXT DEFAULT '',
+            sn TEXT DEFAULT '',
+            mail TEXT DEFAULT '',
+            loginshell TYEXT DEFAULT '',
+            homedirectory TEXT DEFAULT '',
+            disabled SMALLINT  DEFAULT 0,
+            passsha256 TEXT DEFAULT '',
+            passbcrypt TEXT DEFAULT '',
+            otpsecret TEXT DEFAULT '',
+            sshkeys TEXT DEFAULT '',
+            yubikey TEXT DEFAULT '',
+            custattr TEXT DEFAULT '{}'
+          );
+
         """
-        # import sqlite3
-
-        self.module.log(msg=f"users: {self.users}'")
-
+        # self.module.log(msg=f"users: {self.users}'")
         result_state = []
 
-        # CREATE TABLE IF NOT EXISTS users (
-        #   id INTEGER PRIMARY KEY,
-        #   name TEXT NOT NULL,
-        #   uidnumber INTEGER NOT NULL,
-        #   primarygroup INTEGER NOT NULL,
-        #   othergroups TEXT DEFAULT '',
-        #   givenname TEXT DEFAULT '',
-        #   sn TEXT DEFAULT '',
-        #   mail TEXT DEFAULT '',
-        #   loginshell TYEXT DEFAULT '',
-        #   homedirectory TEXT DEFAULT '',
-        #   disabled SMALLINT  DEFAULT 0,
-        #   passsha256 TEXT DEFAULT '',
-        #   passbcrypt TEXT DEFAULT '',
-        #   otpsecret TEXT DEFAULT '',
-        #   sshkeys TEXT DEFAULT '',
-        #   yubikey TEXT DEFAULT '',
-        #   custattr TEXT DEFAULT '{}'
-        # );
-
         for user, values in self.users.items():
+            """
+            """
+            _failed = False
+
             self.module.log(msg=f"  - user: {user}'")
 
             res = {}
@@ -233,28 +250,30 @@ class GlAuthBackendData(object):
             old_checksum = self.__read_checksum_file(_checksum_file)
             cur_checksum = self.__checksum(json.dumps(values, sort_keys=True))
 
-            self.module.log(msg=f"  - old_checksum : '{old_checksum}'")
-            self.module.log(msg=f"  - cur_checksum : '{cur_checksum}'")
+            self.module.log(msg=f"    old_checksum : '{old_checksum}'")
+            self.module.log(msg=f"    cur_checksum : '{cur_checksum}'")
 
             if old_checksum and old_checksum == cur_checksum:
 
                 res[user] = dict(
                     changed=False,
-                    state="User has not schanged."
+                    state="User has not changed."
                 )
             else:
                 # first step:
                 # take a lock into the database
-                user_exists, error, existing_userid, error_message = self.__list_user(user)
+                # user_exists, error, existing_userid, error_message = self.__list_user(user)
+                user_exists, error, existing_userid, error_message = self.__check_database_value('users', 'name', user)
 
                 if user_exists:
                     """
                       update
                     """
-                    self.__update_user(user, values)
+                    success, msg = self.__update_user(user, values)
 
                     res[user] = dict(
                         changed=True,
+                        failed = success,
                         state="User successfully updated."
                     )
 
@@ -262,16 +281,20 @@ class GlAuthBackendData(object):
                     """
                       insert
                     """
-                    self.__insert_user(user, values)
+                    success, msg = self.__insert_user(user, values)
 
                     res[user] = dict(
                         changed=True,
+                        failed = success,
                         state="User successfully created."
                     )
 
-            result_state.append(res)
+                self.module.log(msg=f"    success: {success} '{msg}'")
 
-            self.__checksum_file(cur_checksum, _checksum_file)
+                if success:
+                    self.__checksum_file(cur_checksum, _checksum_file)
+
+            result_state.append(res)
 
         return result_state
 
@@ -310,12 +333,10 @@ class GlAuthBackendData(object):
         return password_hash.hexdigest()
 
 
-    def __list_user(self, user):
+    def __check_database_value(self, table, where, value):
         """
         """
         import sqlite3
-
-        existing_user = 0
 
         try:
           conn = sqlite3.connect(
@@ -325,23 +346,25 @@ class GlAuthBackendData(object):
           )
           conn.row_factory = lambda cursor, row: row[0]
 
-          query = f"select id from users where name = '{user}'"
+          query = f"select id from {table} where {where} = '{value}'"
 
           cursor = conn.execute(query)
 
-          existing_user = cursor.fetchall()
+          userid = cursor.fetchall()
 
-          if isinstance(existing_user, list) and len(existing_user) > 0:
-              existing_user = existing_user[0]
+          if isinstance(userid, list) and len(userid) > 0:
+              existing_userid = userid[0]
+          else:
+              existing_userid = 0
 
-          if existing_user == 0:
+          if existing_userid == 0:
               _exists = False
               _error = False
-              _msg = "The user does not exist."
+              _msg = f"The {where} does not exist."
           else:
               _exists = True
               _error = False
-              _msg = "User already created."
+              _msg = f"{where} already created."
 
         except sqlite3.Error as er:
             self.module.log(msg=f"SQLite error: '{(' '.join(er.args))}'")
@@ -351,21 +374,7 @@ class GlAuthBackendData(object):
             _error = True
             _msg = (' '.join(er.args))
 
-        return _exists, _error, existing_user, _msg
-
-
-        # try:
-        #     number_of_rows = cursor.execute(q)
-        #     cursor.fetchone()
-        #     cursor.close()
-        #
-        # except Exception as e:
-        #     self.module.fail_json(msg="Cannot execute SQL '%s' : %s" % (q, to_native(e)))
-        #
-        # if number_of_rows == 1:
-        #     return True, False, ""
-        # else:
-        #     return False, False, ""
+        return _exists, _error, existing_userid, _msg
 
 
     def __insert_user(self, user, values):
@@ -399,47 +408,53 @@ class GlAuthBackendData(object):
            values
           ('{user}', '{uid}', '{primary_group}', '{given_name}', '{sn}', '{mail}', '{login_shell}', '{home_dir}')
         """
-
-        self.module.log(msg=f"  - query: {query}'")
+        self.module.log(msg=f"  - query: {query}")
 
         result, last_inserted_id, msg = self.__execute_query(query)
 
         if result and last_inserted_id:
-            self.module.log(msg=f"  - last_inserted_id: {last_inserted_id}'")
+            """
+            """
+            # self.module.log(msg=f"  - last_inserted_id: {last_inserted_id}'")
 
             if pass_sha256:
-                """
-                """
-                query = f"update users set passsha256 = '{pass_sha256}' where uidnumber = '{uid}' and id = {last_inserted_id}"
-                self.module.log(msg=f"  - query: {query}'")
-
-                result, last_inserted_id, msg = self.__execute_query(query)
+                self.__update_user_single_field(uid, "passsha256", pass_sha256)
 
             if pass_bcrypt:
-                """
-                """
-                query = f"update users set passbcrypt = '{pass_bcrypt}' where uidnumber = '{uid}' and id = {last_inserted_id}"
-                self.module.log(msg=f"  - query: {query}'")
-
-                result, last_inserted_id, msg = self.__execute_query(query)
+                self.__update_user_single_field(uid, "passbcrypt", pass_bcrypt)
 
             if otp_secret:
-                """
-                """
-                query = f"update users set otpsecret = '{otp_secret}' where uidnumber = '{uid}' and id = {last_inserted_id}"
-                self.module.log(msg=f"  - query: {query}'")
-
-                result, last_inserted_id, msg = self.__execute_query(query)
+                self.__update_user_single_field(uid, "otpsecret", otp_secret)
 
             if len(ssh_keys) > 0:
-                """
-                """
                 _ssh_keys = " ".join(ssh_keys)
+                self.__update_user_single_field(uid, "sshkeys", _ssh_keys)
 
-                query = f"update users set sshkeys = '{_ssh_keys}' where uidnumber = '{uid}' and id = {last_inserted_id}"
-                self.module.log(msg=f"  - query: {query}'")
+            if len(capabilities) > 0:
+                """
+                    CREATE TABLE IF NOT EXISTS capabilities (
+                      id INTEGER PRIMARY KEY,
+                      userid INTEGER NOT NULL,
+                      action TEXT NOT NULL,
+                      object TEXT NOT NULL
+                    );
+                """
+                for action, obj in capabilities.items():
+                    """
+                    """
+                    _object = obj.get('object')
+                    #self.module.log(msg=f"  - action: {action} / {_object}")
+                    query = f"insert or replace into capabilities (`userid`, `action`, `object`) values ({last_inserted_id}, '{action}', '{_object}')"
+                    # self.module.log(msg=f"  - query: {query}")
 
-                result, last_inserted_id, msg = self.__execute_query(query)
+                    result, last_inserted_id, msg = self.__execute_query(query)
+
+                    if not result:
+                        self.module.log(msg=f"  ERROR : {msg}")
+                        break
+
+        return result, ""
+
 
     def __update_user(self, user, values):
         """
@@ -463,14 +478,45 @@ class GlAuthBackendData(object):
         home_dir = values.get("home_dir", '')
         capabilities = values.get("capabilities", {})
 
-        self.module.log(msg=f"  - passwords  : '{passwords}'")
+        # self.module.log(msg=f"  - passwords  : '{passwords}'")
 
-        pass
+        query = f"update users set `uidnumber` = '{uid}', `primarygroup` = '{primary_group}', `givenname` = '{given_name}' ,`sn` = '{sn}', `mail` = '{mail}', `loginshell` = '{login_shell}', `homedirectory` = '{home_dir}' where name = '{user}'"
+        self.module.log(msg=f"  - query: {query}")
+
+        result, _, msg = self.__execute_query(query)
+
+        self.module.log(msg=f"  - {result} / {msg}")
+
+        if result:
+            if pass_sha256:
+                self.__update_user_single_field(uid, "passsha256", pass_sha256)
+
+            if pass_bcrypt:
+                self.__update_user_single_field(uid, "passbcrypt", pass_bcrypt)
+
+            if otp_secret:
+                self.__update_user_single_field(uid, "otpsecret", otp_secret)
+
+            if len(ssh_keys) > 0:
+                _ssh_keys = " ".join(ssh_keys)
+                self.__update_user_single_field(uid, "sshkeys", _ssh_keys)
+
+        return result, msg
+
+
+    def __update_user_single_field(self, uid, field, value):
+        """
+        """
+        query = f"update users set {field} = '{value}' where uidnumber = '{uid}'"
+
+        result, last_inserted_id, msg = self.__execute_query(query)
+
 
     def __execute_query(self, query):
         """
         """
         import sqlite3
+        # self.module.log(msg=f"__execute_query({query})")
 
         try:
             conn = sqlite3.connect(
@@ -483,7 +529,7 @@ class GlAuthBackendData(object):
 
             last_inserted_id = cursor.lastrowid
 
-            return True, last_inserted_id, ""
+            return True, last_inserted_id, "query successfully executed"
 
         except sqlite3.Error as er:
             self.module.log(msg=f"SQLite error: '{(' '.join(er.args))}'")
@@ -492,6 +538,7 @@ class GlAuthBackendData(object):
             _msg = (' '.join(er.args))
 
             return False, -1, _msg
+
 
     def __create_directory(self, dir):
         """
@@ -510,10 +557,13 @@ class GlAuthBackendData(object):
     def __checksum_file(self, checksum, checksum_file):
         """
         """
+        self.module.log(msg=f"    write checksum_file : '{checksum_file}'")
+
         with open(checksum_file, "w") as f:
             f.write(checksum)
 
         return True
+
 
     def __read_checksum_file(self, checksum_file):
         """
