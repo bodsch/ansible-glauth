@@ -98,7 +98,7 @@ class GlAuthBackendData(object):
               """
               self.import_groups()
 
-              result_state = self.import_users()
+              ## -> result_state = self.import_users()
 
 
         except sqlite3.Error as er:
@@ -144,6 +144,9 @@ class GlAuthBackendData(object):
         # find all failed and define our variable
         failed = (len({k: v for k, v in combined_d.items() if v.get('failed')}) > 0)
 
+        self.module.log(msg=f" - changed '{changed}'")
+        self.module.log(msg=f" - failed  '{failed}'")
+
         result_msg = {k: v.get('state') for k, v in combined_d.items()}
 
         return dict(
@@ -162,9 +165,10 @@ class GlAuthBackendData(object):
               gidnumber INTEGER NOT NULL
             );
         """
-        # self.module.log(msg=f"groups: {self.groups}'")
         for group, values in self.groups.items():
             """
+                name        LDAP group name (i.e. cn or ou depending on context)
+                gidnumber   LDAP GID attribute
             """
             self.module.log(msg=f"  - group: {group}")
 
@@ -172,7 +176,6 @@ class GlAuthBackendData(object):
             include_groups = values.get("include_groups", [])
 
             group_exists, error, existing_groupid, error_message = self.__check_database_value('groups', 'name', group)
-
 
             if group_exists:
                 """
@@ -192,22 +195,24 @@ class GlAuthBackendData(object):
                 existing_groupid = last_inserted_id
 
             if success:
+                """
+                """
                 query = f"delete from includegroups where parentgroupid = {existing_groupid}"
                 success, _, msg = self.__execute_query(query)
 
                 if len(include_groups) > 0 and existing_groupid:
-                    # CREATE TABLE IF NOT EXISTS includegroups (
-                    #   id INTEGER PRIMARY KEY,
-                    #   parentgroupid INTEGER NOT NULL,
-                    #   includegroupid INTEGER NOT NULL
-                    # );
                     for include_group in include_groups:
                         """
-                        """
-                        query = f"insert into includegroups (`parentgroupid`, `includegroupid`) values('{existing_groupid}', '{include_group}')"
-                        self.module.log(msg=f"  - query: {query}'")
+                          'includegroupid' is the reference to id in 'users'!
 
-                        result, last_inserted_id, msg = self.__execute_query(query)
+                          parentgroupid   the LDAP group id containing another group, used by glauth
+                          ncludegroupid   the LDAP group id contained in the parent group, used by glauth
+                        """
+                        _id = self.__group_id(int(include_group))
+
+                        if _id:
+                            query = f"insert into includegroups (`parentgroupid`, `includegroupid`) values('{existing_groupid}', '{_id}')"
+                            result, last_inserted_id, msg = self.__execute_query(query)
 
 
     def import_users(self):
@@ -271,8 +276,11 @@ class GlAuthBackendData(object):
                     """
                     success, msg = self.__update_user(user, values)
 
+                    if success:
+                        _failed = False
+
                     res[user] = dict(
-                        changed=True,
+                        changed = True,
                         failed = success,
                         state="User successfully updated."
                     )
@@ -283,9 +291,12 @@ class GlAuthBackendData(object):
                     """
                     success, msg = self.__insert_user(user, values)
 
+                    if success:
+                        _failed = False
+
                     res[user] = dict(
-                        changed=True,
-                        failed = success,
+                        changed = True,
+                        failed = _failed,
                         state="User successfully created."
                     )
 
@@ -379,28 +390,31 @@ class GlAuthBackendData(object):
 
     def __insert_user(self, user, values):
         """
+          # https://glauth.github.io/docs/databases.html
+
+          Note that, in `users`, `othergroups` is a comma-separated list of group ids.
         """
         self.module.log(msg=f"__insert_user('{user}')")
 
-        given_name = values.get("given_name", None)
-        sn = values.get("sn", '')
-        mail = values.get("mail", '')
-        uid = values.get("uid", None)
-        primary_group = values.get("primary_group", None)
-        other_groups = values.get("other_groups", [])
-        passwords = values.get("pass", None)
-        if passwords:
-            pass_sha256 = passwords.get("sha256", None)
-            pass_bcrypt = passwords.get("bcrypt", None)
-        ssh_keys = values.get("ssh_keys", [])
-        otp_secret = values.get("otp_secret", None)
-        yubikey = values.get("yubikey", None)
-        login_shell = values.get("login_shell", '')
-        home_dir = values.get("home_dir", '')
-        capabilities = values.get("capabilities", {})
+        given_name = values.get("given_name", None)             # LDAP name (i.e. cn, uid)
+        sn = values.get("sn", '')                               # LDAP sn attribute, i.e. an account’s last name
+        mail = values.get("mail", '')                           # LDAP mail attribute, i.e. email address; also used as userPrincipalName
+        uid = values.get("uid", None)                           # LDAP UID attribute
+        primary_group = values.get("primary_group", None)       # An LDAP group’s GID attribute; also used to build ou attribute; used to build memberOf
+        other_groups = values.get("other_groups", [])           # A comma-separated list of GID attributes; used to build memberOf
+        passwords = values.get("pass", None)                    #
+        if passwords:                                           #
+            pass_sha256 = passwords.get("sha256", None)         # SHA256 account password
+            pass_bcrypt = passwords.get("bcrypt", None)         # BCRYPT-encrypted account password
+        ssh_keys = values.get("ssh_keys", [])                   # A comma-separated list of sshPublicKey attributes
+        otp_secret = values.get("otp_secret", None)             # OTP secret, for two-factor authentication
+        yubikey = values.get("yubikey", None)                   # UBIKey, for two-factor authentication
+        login_shell = values.get("login_shell", '')             # LDAP loginShell attribute, pushed to the client, may be ignored
+        home_dir = values.get("home_dir", '')                   # LDAP homeDirectory attribute, pushed to the client, may be ignored
+        capabilities = values.get("capabilities", {})           # used to retrieve capabilities granted to users linked to it from the users table
+        custom_attrs = values.get("custom_attrs", {})           # A JSON-encoded string, containing arbitrary additional attributes; must be {} by default
 
-        self.module.log(msg=f"  - passwords  : '{passwords}'")
-        self.module.log(msg=f"  - pass sha256: '{pass_sha256}'")
+        # gid = self.__group_id(int(primary_group))
 
         query = f"""
           insert into users
@@ -408,14 +422,18 @@ class GlAuthBackendData(object):
            values
           ('{user}', '{uid}', '{primary_group}', '{given_name}', '{sn}', '{mail}', '{login_shell}', '{home_dir}')
         """
-        self.module.log(msg=f"  - query: {query}")
+        # self.module.log(msg=f"  - query: {query}")
 
         result, last_inserted_id, msg = self.__execute_query(query)
+
+        self.module.log(msg=f"  - result: {result}, last_inserted_id: {last_inserted_id}, msg: {msg}")
 
         if result and last_inserted_id:
             """
             """
-            # self.module.log(msg=f"  - last_inserted_id: {last_inserted_id}'")
+            if other_groups:
+                _other_groups=",".join(other_groups)
+                self.__update_user_single_field(uid, "other_groups", _other_groups)
 
             if pass_sha256:
                 self.__update_user_single_field(uid, "passsha256", pass_sha256)
@@ -427,7 +445,7 @@ class GlAuthBackendData(object):
                 self.__update_user_single_field(uid, "otpsecret", otp_secret)
 
             if len(ssh_keys) > 0:
-                _ssh_keys = " ".join(ssh_keys)
+                _ssh_keys = ",".join(ssh_keys)
                 self.__update_user_single_field(uid, "sshkeys", _ssh_keys)
 
             if len(capabilities) > 0:
@@ -441,13 +459,16 @@ class GlAuthBackendData(object):
                 """
                 for action, obj in capabilities.items():
                     """
+                        userid  internal user id number, used by glauth
+                        action  string representing an allowed action, e.g. “search”
+                        object  string representing scope of allowed action, e.g. “ou=superheros,dc=glauth,dc=com”
                     """
                     _object = obj.get('object')
-                    #self.module.log(msg=f"  - action: {action} / {_object}")
                     query = f"insert or replace into capabilities (`userid`, `action`, `object`) values ({last_inserted_id}, '{action}', '{_object}')"
-                    # self.module.log(msg=f"  - query: {query}")
 
                     result, last_inserted_id, msg = self.__execute_query(query)
+
+                    self.module.log(msg=f"  - result: {result}, last_inserted_id: {last_inserted_id}, msg: {msg}")
 
                     if not result:
                         self.module.log(msg=f"  ERROR : {msg}")
@@ -514,9 +535,13 @@ class GlAuthBackendData(object):
 
     def __execute_query(self, query):
         """
+          return:
+            if successfully    : True, last_inserted_id, message
+            if NOT successfully: False, -1, error_message
         """
-        import sqlite3
         # self.module.log(msg=f"__execute_query({query})")
+
+        import sqlite3
 
         try:
             conn = sqlite3.connect(
@@ -525,11 +550,21 @@ class GlAuthBackendData(object):
                 detect_types=sqlite3.PARSE_COLNAMES
             )
 
-            cursor = conn.execute(query)
+            if "select" in query:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.execute(query)
 
-            last_inserted_id = cursor.lastrowid
+                rows = cursor.fetchall()
+                # result as json
+                r = json.dumps( [dict(ix) for ix in rows] )
 
-            return True, last_inserted_id, "query successfully executed"
+                return True, r, ""
+
+            else:
+                cursor = conn.execute(query)
+                last_inserted_id = cursor.lastrowid
+
+                return True, last_inserted_id, "query successfully executed"
 
         except sqlite3.Error as er:
             self.module.log(msg=f"SQLite error: '{(' '.join(er.args))}'")
@@ -538,6 +573,47 @@ class GlAuthBackendData(object):
             _msg = (' '.join(er.args))
 
             return False, -1, _msg
+
+
+    def __group_id(self, gid):
+        """
+        """
+        _id = None
+
+        state, data = self.__group_data()
+
+        if isinstance(data, str):
+            data = json.loads(data)
+
+        if state:
+            data = [d for d in data if int(d.get('gidnumber')) == int(gid)]
+
+            if len(data) > 0:
+                _id = data[0].get("id", None)
+
+        return _id
+
+
+    def __group_data(self):
+        """
+          return a dictionary with all group informations
+        """
+        query = "select id, name, gidnumber from groups order by gidnumber"
+
+        result, data, _ = self.__execute_query(query)
+
+        return result, data
+
+
+    def __user_data(self):
+        """
+          return a dictionary with a subset of user informations
+        """
+        query = "select id, name, uidnumber from users order by uidnumber"
+
+        result, data, _ = self.__execute_query(query)
+
+        return result, data
 
 
     def __create_directory(self, dir):

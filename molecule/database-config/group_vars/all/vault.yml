@@ -1,0 +1,9 @@
+---
+
+vault__ldap:
+  admin: rul7Upt3ekggY3jl6FnSgG9NqALjwR0v
+
+vault__database:
+  glauth: 38ioVLHIIj0q4Ni7N2NuXrIF6bouKTlN
+
+...

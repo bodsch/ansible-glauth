@@ -1,0 +1,122 @@
+---
+
+# glauth_version: latest
+
+glauth_service:
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_config:
+  syslog: true
+  debug: true
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_backends:
+  config:
+    base_dn: "dc=molecule,dc=lan"
+    name_format: "cn"
+    group_format: "ou"
+  sqlite:
+    enabled: true
+    base_dn: "dc=molecule,dc=lan"
+    database: "glauth.db"
+
+glauth_groups:
+  admins:
+    gid: 3000
+  users:
+    gid: 4000
+    include_groups:
+      - 4001
+  grafana:
+    gid: 4001
+
+  vpn:
+    gid: 4005
+    include_groups:
+      - 5000
+      - 5001
+
+
+glauth_users:
+  admin:
+    enabled: true
+    given_name: Admin
+    sn: ""
+    mail: "admin@matrix.lan"
+    uid: 3000
+    primary_group: 3000
+    other_groups: []
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+      sha256_apps: []
+      bcrypt: ""
+      bcrypt_apps: []
+    ssh_keys: []
+    otp_secret: ""
+    yubikey: ""
+    login_shell: ""
+    home_dir: ""
+    capabilities:
+      search:
+        object: "*"
+    custom_attrs: {}
+
+  bodsch:
+    given_name: "Bo"
+    sn: "Sch"
+    uid: 4000
+    primary_group: 4000
+    other_groups:
+      - 4001
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+    ssh_keys:
+      - ssh-dss AAAAB3NzaC1kc3MAAAEBAIvKoTLQb6EgAvGVWzhTw2QqoXT3zADW7RHa2aml8+zrZXu1RHSIAeX8o2oJsl/Q8IFOq6TKQ+N4Ab89JinbGLze/2/8BI2sypZLmfMjiA1+hJq6bjC7ZzSwdvPt1Jc57d/TSo99mAsyBx2IOsTobnjSetN0lyp3RNv3lwxkES3pcM6VsCu30gF5r22eFlaGsV/OejZ5Ul2ks5OblmOXTChC5l4oDzukauRUkAFag/ph9JJDSoX5F+oYMEvf5nJI9MEH9ADyM2s3yYEfgxVkpv3TEEVbYY6lpJuS+G9D6V1NQm1GFgAGms+3Nmb1VgKgqFn4WX/CIseng46Cyo4m6lMAAAAVALHwKJt7fRjirHwJeg0A3H3knKlfAAABAFHCOpIysIVNb8tozx+8L3pFVw4+QAxmZlVJrf2Y6ghcKNUwo1O6iZ3c+q8o/DKdK5HQGVLILmeDOLQ8S4bwAViXZ5bnR6UUGJFpU7npqdyk2R0rBYzcP29TGGdMy4tpmkkmGgxTzY0Z8C/17R6zTfHHRnWTNRE5jTTAr+7sAGvlH3NRCGYT3rmfamVX4ekVJ618HJOuTCN1U2RQXe/uJE6EiqL4fg0VfMY/iqnqpD8/Q76E8GTFTTeurRIK45dG+C8omGO1+xWt4EGubAEiNhNkRsaSHpLr5P1rTy63PcYEyZJdxsKq63bgCWYuYmGn1+ZEqIxw7FyFdxo5WTCs+cAAAAEAH9RDwGZ/Lc622hobcvHmcxmJFzhBWPvrR5uI7bwGz8LvIQ8zZHsN2QD2pYgnwmt8RJmX1ErJVklOdmCGF/NVOkQ3pQ1TJHHogl+hwfeITUmPNXsbdimG2Z2ybki2GebWUOsk9kNzUIccFmAGM9vogmudjHYfXEkLI99ca1kqLg0nfCCm5K1EU6kKNAwXPl9fJZLDFL/buA0yVRWAoOu5tKVKDpDiYGnUk/uL9rdvo50zc2n7cOu0Peg1lLmAmNnvmtgzskW3CNl1snvv5i/WXco18cQp6PvPvpn2Cy7FMRK4h1LfTrOojCiGQUJps6e2dVhhmjQ2uEn8zSmiYUw65w== dodger@nb_schulz
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHUuPrbu9kSKL1u0gfViSa/P7FkZPk8hYbv7hegpTcY bodo@boone-schulz.de
+    login_shell: "/bin/bash"
+    home_dir: "/home/bodsch"
+    capabilities:
+      search:
+        object: "dc=molecule,dc=lan"
+
+  foo:
+    given_name: "F"
+    sn: "oo"
+    uid: 4001
+    primary_group: 4000
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+    login_shell: "/bin/bash"
+    home_dir: "/home/foo"
+    custom_attrs:
+      employeetype:
+        - Intern
+        - Temp
+      employeenumber:
+        - 12345
+        - 54321
+
+glauth_behaviors:
+  ignore_capabilities: true
+
+glauth_api:
+  enabled: true
+  listen:
+    address: "0.0.0.0"
+
+...
