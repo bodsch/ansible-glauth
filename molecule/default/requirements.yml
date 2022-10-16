@@ -2,6 +2,5 @@
 
 - name: syslog-ng
   src: bodsch.syslog_ng
-  version: 1.4.0
 
 ...
