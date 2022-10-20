@@ -131,9 +131,9 @@ glauth_frontends: {}
 | `primary_group`    | 2.1            | `int`    | `-`     |             |
 | `other_groups`     | 2.1            | `list`   | `-`     |             |
 | `pass.sha256`      | 2.1            | `string` | `-`     |             |
-| `pass.sha256_apps` | 2.1            | `list`   | `-`     |             |
+| `pass.sha256_apps` | 2.1            | `list`   | `-`     | Specify an array of app passwords which can also succesfully bind - these bypass the OTP check. Hash the same way as password.            |
 | `pass.bcrypt`      | 2.1            | `string` | `-`     |             |
-| `pass.bcrypt_apps` | 2.1            | `list`   | `-`     |             |
+| `pass.bcrypt_apps` | 2.1            | `list`   | `-`     | Specify an array of app passwords which can also succesfully bind - these bypass the OTP check. Hash the same way as password.            |
 | `ssh_keys`         | 2.1            | `list`   | `-`     |             |
 | `otp_secret`       | 2.1            | `string` | `-`     |             |
 | `yubikey`          | 2.1            | `string` | `-`     |             |
@@ -141,6 +141,17 @@ glauth_frontends: {}
 | `home_dir`         | 2.1            | `string` | `-`     |             |
 | `capabilities`     | 2.1            | `dict`   | `-`     |             |
 | `custom_attrs`     | 2.1            | `dict`   | `-`     |             |
+
+
+#### create sha256 password
+
+```bash
+echo -n "PASSWORD" | openssl dgst -sha256
+(stdin)= 0be64ae89ddd24e225434de95d501711339baeee18f009ba9b4369af27d30d60
+```
+
+
+
 
 
 #### `capabilities`

@@ -101,6 +101,8 @@ glauth_users:
     pass:
       # echo -n "xxx" | openssl dgst -sha256
       sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+      #
+      bcrypt: "$2y$10$2NyN8Hl6C41BWeM511ebUusp/EmSn1sIhdWLbEC3ib54guXyRmE9O"
     login_shell: "/bin/bash"
     home_dir: "/home/foo"
     custom_attrs:

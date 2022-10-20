@@ -97,6 +97,7 @@ class GlAuthBackendData(object):
               """
               """
               self.import_groups()
+              result_state = self.import_users()
 
               ## -> result_state = self.import_users()
 
@@ -165,6 +166,7 @@ class GlAuthBackendData(object):
               gidnumber INTEGER NOT NULL
             );
         """
+        self.module.log(msg="import_groups")
         for group, values in self.groups.items():
             """
                 name        LDAP group name (i.e. cn or ou depending on context)
@@ -214,6 +216,7 @@ class GlAuthBackendData(object):
                             query = f"insert into includegroups (`parentgroupid`, `includegroupid`) values('{existing_groupid}', '{_id}')"
                             result, last_inserted_id, msg = self.__execute_query(query)
 
+        self.module.log(msg="done.")
 
     def import_users(self):
         """
@@ -240,6 +243,8 @@ class GlAuthBackendData(object):
         """
         # self.module.log(msg=f"users: {self.users}'")
         result_state = []
+
+        self.module.log(msg="import_users")
 
         for user, values in self.users.items():
             """
@@ -306,6 +311,8 @@ class GlAuthBackendData(object):
                     self.__checksum_file(cur_checksum, _checksum_file)
 
             result_state.append(res)
+
+        self.module.log(msg="done.")
 
         return result_state
 
@@ -422,8 +429,6 @@ class GlAuthBackendData(object):
            values
           ('{user}', '{uid}', '{primary_group}', '{given_name}', '{sn}', '{mail}', '{login_shell}', '{home_dir}')
         """
-        # self.module.log(msg=f"  - query: {query}")
-
         result, last_inserted_id, msg = self.__execute_query(query)
 
         self.module.log(msg=f"  - result: {result}, last_inserted_id: {last_inserted_id}, msg: {msg}")
@@ -432,8 +437,8 @@ class GlAuthBackendData(object):
             """
             """
             if other_groups:
-                _other_groups=",".join(other_groups)
-                self.__update_user_single_field(uid, "other_groups", _other_groups)
+                _other_groups=",".join(str(other_groups))
+                self.__update_user_single_field(uid, "othergroups", _other_groups)
 
             if pass_sha256:
                 self.__update_user_single_field(uid, "passsha256", pass_sha256)
@@ -468,7 +473,7 @@ class GlAuthBackendData(object):
 
                     result, last_inserted_id, msg = self.__execute_query(query)
 
-                    self.module.log(msg=f"  - result: {result}, last_inserted_id: {last_inserted_id}, msg: {msg}")
+                    # self.module.log(msg=f"    - result: {result}, last_inserted_id: {last_inserted_id}, msg: {msg}")
 
                     if not result:
                         self.module.log(msg=f"  ERROR : {msg}")
@@ -567,9 +572,10 @@ class GlAuthBackendData(object):
                 return True, last_inserted_id, "query successfully executed"
 
         except sqlite3.Error as er:
-            self.module.log(msg=f"SQLite error: '{(' '.join(er.args))}'")
-            self.module.log(msg=f"Exception class is '{er.__class__}'")
-
+            self.module.log(msg=f"    ERROR")
+            self.module.log(msg=f"      query       : '{query}'")
+            self.module.log(msg=f"      SQLite error: '{(' '.join(er.args))}'")
+            #self.module.log(msg=f"      Exception class is '{er.__class__}'")
             _msg = (' '.join(er.args))
 
             return False, -1, _msg
