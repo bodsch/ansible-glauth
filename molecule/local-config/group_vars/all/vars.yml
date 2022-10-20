@@ -1,0 +1,101 @@
+---
+
+glauth_version: latest
+
+glauth_service:
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_config:
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_backends:
+  config:
+    base_dn: "dc=molecule,dc=lan"
+    name_format: "cn"
+    group_format: "ou"
+
+glauth_groups:
+  admins:
+    gid: 3000
+  vpn:
+    gid: 3001
+  users:
+    gid: 6000
+    include_groups:
+      - 3001
+
+glauth_users:
+  admin:
+    enabled: true
+    given_name: Admin
+    sn: ""
+    mail: "admin@matrix.lan"
+    uid: 3000
+    primary_group: 3000
+    other_groups: []
+    pass:
+      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
+      sha256_apps: []
+      bcrypt: ""
+      bcrypt_apps: []
+    ssh_keys: []
+    otp_secret: ""
+    yubikey: ""
+    login_shell: ""
+    home_dir: ""
+    capabilities:
+#      "*":
+#        object: "dc=matrix,dc=lan"
+      "*":
+        object: "dc=molecule,dc=lan"
+    custom_attrs:
+      employeetype:
+        - Intern
+        - Temp
+      employeenumber:
+        - 12345
+        - 54321
+
+  bodsch:
+    given_name: "B."
+    sn: "Schulz"
+    uid: 6000
+    primary_group: 6000
+    other_groups:
+      - 3001
+    pass:
+      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
+      sha256_apps:
+        - "fc6be9b218afa2ce37409580b8a4907feb6c1ea878d1222e4d2b84e81c1c0e47"
+        - "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+    ssh_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHUuPrbu9kSKL1u0gfViSa/P7FkZPk8hYbv7hegpTcY bodo@boone-schulz.de"
+    login_shell: "/bin/bash"
+    home_dir: "/home/bodsch"
+    capabilities:
+#      "search":
+#        object: "dc=matrix,dc=lan"
+      "search":
+        object: "dc=molecule,dc=lan"
+
+glauth_behaviors:
+  ignore_capabilities: true
+
+glauth_api:
+  enabled: true
+  listen:
+    address: "0.0.0.0"
+
+...

@@ -3,6 +3,9 @@
   {% for user, values in glauth_users.items() %}
 [[users]]
   name          = "{{ user }}"
+    {% if not values.enabled | default('false') | bool  %}
+  disabled = true
+    {% endif %}
     {% if values.uid | default('') | int > 0  %}
   uidnumber     = {{ values.uid | int }}
     {% endif %}
@@ -43,6 +46,20 @@
   [[users.capabilities]]
     action = "{{ cap }}"
     object = "{{ obj.object }}"
+      {% endfor %}
+    {% endif %}
+
+    {% if values.custom_attrs is defined and
+          values.custom_attrs | count > 0 %}
+      {% for key, values in values.custom_attrs.items() %}
+  [[users.customattributes]]
+        {% if values | type == "list" %}
+    {{ key }} = [
+    {{ values | join(",\n") | indent(4) }}
+  ]
+        {% elif values | type == "str" %}
+    {{ key }} = "{{ values }}"
+        {% endif %}
       {% endfor %}
     {% endif %}
 
