@@ -150,7 +150,13 @@ echo -n "PASSWORD" | openssl dgst -sha256
 (stdin)= 0be64ae89ddd24e225434de95d501711339baeee18f009ba9b4369af27d30d60
 ```
 
+#### create sha256 password
 
+```bash
+pip install bcrypt
+python -c 'import bcrypt; print(bcrypt.hashpw(b"password", bcrypt.gensalt(rounds=10)))'
+b'$2b$10$8GTQxz.fgT3XNj2W7ruhmuXS/YMlakp/ZL5UkbDz1y2uIrbYNSwim'
+```
 
 
 
