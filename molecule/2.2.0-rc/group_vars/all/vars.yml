@@ -1,8 +1,6 @@
 ---
 
-glauth_version: 2.1.0
-
-# glauth_version: 2.2.0-RC1
+glauth_version: 2.2.0-RC1
 
 glauth_service:
   listen:
