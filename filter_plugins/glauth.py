@@ -69,11 +69,10 @@ class FilterModule(object):
 
         return checksum
 
-
     def plugins(self, data):
         """
         """
-        display.v(f"plugins(self, data")
+        # display.v("plugins(self, data")
 
         result = []
 
@@ -81,8 +80,8 @@ class FilterModule(object):
             path = d.get("path")
 
             if path:
-              basename = os.path.basename(path)
+                basename = os.path.basename(path)
 
-              result.append(basename)
+                result.append(basename)
 
         return result
