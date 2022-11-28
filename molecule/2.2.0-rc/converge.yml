@@ -1,0 +1,21 @@
+---
+- name: converge
+  hosts: all
+  any_errors_fatal: false
+
+  environment:
+    NETRC: ''
+    # https://github.com/ansible/ansible/issues/77133
+    # https://github.com/ansible/ansible/pull/76542
+    # LANGUAGE: en_UK.utf8
+
+  pre_tasks:
+    - debug:
+        msg:
+          - "facts            : {{ ansible_facts.system }}"
+
+     # {{ ansible_facts.system | lower }}
+
+
+  roles:
+    - role: ansible-glauth

@@ -44,7 +44,7 @@
       become: false
       run_once: true
       uri:
-        url: "https://api.github.com/repos/glauth/glauth/releases/latest"
+        url: "{{ glauth_release_api_url }}/latest"
         method: GET
         return_content: true
         status_code: 200
@@ -151,37 +151,12 @@
 
 - name: merge glauth service configuration between defaults and custom
   set_fact:
-    glauth_service: "{{ glauth_defaults_service |
-      combine( glauth_service, recursive=True) }}"
-
-- name: merge glauth config configuration between defaults and custom
-  set_fact:
-    glauth_config: "{{ glauth_defaults_config |
-      combine( glauth_config, recursive=True) }}"
-
-- name: merge glauth backends configuration between defaults and custom
-  set_fact:
-    glauth_backends: "{{ glauth_defaults_backends |
-      combine( glauth_backends, recursive=True) }}"
-
-- name: merge glauth users configuration between defaults and custom
-  set_fact:
-    glauth_users: "{{ glauth_defaults_users |
-      combine( glauth_users, recursive=True) }}"
-
-- name: merge glauth groups configuration between defaults and custom
-  set_fact:
-    glauth_groups: "{{ glauth_defaults_groups |
-      combine( glauth_groups, recursive=True) }}"
-
-- name: merge glauth behaviors configuration between defaults and custom
-  set_fact:
-    glauth_behaviors: "{{ glauth_defaults_behaviors |
-      combine( glauth_behaviors, recursive=True) }}"
-
-- name: merge glauth api configuration between defaults and custom
-  set_fact:
-    glauth_api: "{{ glauth_defaults_api |
-      combine( glauth_api, recursive=True) }}"
+    glauth_service: "{{ glauth_defaults_service | combine( glauth_service, recursive=True) }}"
+    glauth_config: "{{ glauth_defaults_config | combine( glauth_config, recursive=True) }}"
+    glauth_backends: "{{ glauth_defaults_backends | combine( glauth_backends, recursive=True) }}"
+    glauth_users: "{{ glauth_defaults_users | combine( glauth_users, recursive=True) }}"
+    glauth_groups: "{{ glauth_defaults_groups | combine( glauth_groups, recursive=True) }}"
+    glauth_behaviors: "{{ glauth_defaults_behaviors | combine( glauth_behaviors, recursive=True) }}"
+    glauth_api: "{{ glauth_defaults_api | combine( glauth_api, recursive=True) }}"
 
 ...

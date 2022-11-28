@@ -1,0 +1,35 @@
+---
+
+- name: install binary
+  when:
+    - _detected_binary.files is defined
+    - _detected_binary.files | count > 0
+  block:
+    - name: propagate glauth binaries
+      copy:
+        src: "{{ _detected_binary.files[0].path }}"
+        dest: "{{ glauth_install_path }}/glauth"
+        mode: 0755
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+        remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
+
+    - name: make files executable
+      file:
+        path: "{{ glauth_install_path }}/glauth"
+        mode: 0755
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+
+- name: create link to binary
+  file:
+    src: "{{ glauth_install_path }}/glauth"
+    dest: "/usr/bin/glauth"
+    state: link
+    force: true
+    follow: false
+  notify:
+    - validate config
+    - restart glauth
+
+...
