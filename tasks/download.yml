@@ -32,7 +32,7 @@
   set_fact:
     glauth_download_artefact: "{{ glauth_local_tmp_directory }}/{{ glauth_download_url | basename }}"
 
-- name: detect former downloaded artefact '{{ glauth_local_tmp_directory }}/{{ glauth_download_url | basename }}'
+- name: locate previously downloaded artefacts '{{ glauth_download_url | basename }}'
   delegate_to: localhost
   become: false
   run_once: true
@@ -56,6 +56,14 @@
   ignore_errors: true
   when:
     - not stat_glauth_downloaded_artefact.stat.exists | default('false')
+
+- name: verify downloaded artefact '{{ glauth_download_url | basename }}'
+  delegate_to: localhost
+  become: false
+  run_once: true
+  stat:
+    path: "{{ glauth_download_artefact }}"
+  register: stat_glauth_downloaded_artefact
 
 - name: extract glauth archive
   become: false

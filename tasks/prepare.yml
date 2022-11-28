@@ -37,8 +37,13 @@
   package:
     name: "{{ glauth_requirements }}"
     state: present
+  when:
+    - glauth_requirements | default([]) | count > 0
 
-- block:
+- name: latest release
+  when:
+    - glauth_version == "latest"
+  block:
     - name: get latest release
       delegate_to: localhost
       become: false
@@ -57,11 +62,9 @@
       until: _latest_release.status == 200
       retries: 5
 
-    - name: set glauth version to {{ _latest_release.json.tag_name[1:] }}
+    - name: re-define glauth_version
       set_fact:
         glauth_version: "{{ _latest_release.json.tag_name[1:] }}"
-  when:
-    - glauth_version == "latest"
 
 - name: detect our installation path '{{ glauth_install_path | dirname }}'
   stat:
@@ -105,14 +108,6 @@
     path: "{{ glauth_install_path }}/glauth"
   register: stat_glauth_binary
 
-- name: create download directory
-  become: false
-  delegate_to: "{{ glauth_delegate_to }}"
-  file:
-    path: "{{ glauth_local_tmp_directory }}"
-    state: directory
-    mode: 0750
-
 - name: user and group handling
   block:
     - name: create glauth group
@@ -133,6 +128,14 @@
   when:
     - glauth_system_user != "root"
 
+- name: create download directory
+  become: false
+  delegate_to: "{{ glauth_delegate_to }}"
+  file:
+    path: "{{ glauth_local_tmp_directory }}"
+    state: directory
+    mode: 0750
+
 - name: create install directory
   file:
     path: "{{ glauth_install_path }}"
@@ -141,7 +144,7 @@
     group: "{{ glauth_system_group }}"
     mode: 0755
 
-- name: create ansible local facts directory
+- name: create ansible facts directory
   file:
     dest: /etc/ansible/facts.d
     state: directory
@@ -149,7 +152,7 @@
     group: root
     mode: 0775
 
-- name: merge glauth service configuration between defaults and custom
+- name: merge glauth configuration between defaults and custom
   set_fact:
     glauth_service: "{{ glauth_defaults_service | combine( glauth_service, recursive=True) }}"
     glauth_config: "{{ glauth_defaults_config | combine( glauth_config, recursive=True) }}"
