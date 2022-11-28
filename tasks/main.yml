@@ -9,7 +9,7 @@
     - not stat_glauth_binary.stat.exists
 
 - name: install
-  include_tasks: install.yml
+  include_tasks: install/main.yml
 
 - name: configure
   include_tasks: configure.yml

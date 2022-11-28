@@ -3,6 +3,7 @@
 glauth_version: 2.1.0
 
 glauth_release_download_url: https://github.com/glauth/glauth/releases
+glauth_release_api_url: https://api.github.com/repos/glauth/glauth/releases
 
 glauth_system_user: glauth
 glauth_system_group: glauth

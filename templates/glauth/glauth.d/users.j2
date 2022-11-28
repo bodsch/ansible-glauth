@@ -62,14 +62,15 @@
 
     {% if values.custom_attrs is defined and
           values.custom_attrs | count > 0 %}
-      {% for key, values in values.custom_attrs.items() %}
+      {% for key, value in values.custom_attrs.items() %}
   [[users.customattributes]]
-        {% if values | type == "list" %}
+        {% if value | type == "list" %}
     {{ key }} = [
-    {{ values | join(",\n") | indent(4) }}
+          {% set _, result_value = value | has_valid_values %}
+      {{ result_value | join(",\n") | indent(6) }}
   ]
-        {% elif values | type == "str" %}
-    {{ key }} = "{{ values }}"
+        {% elif value | type == "str" %}
+    {{ key }} = "{{ value }}"
         {% endif %}
       {% endfor %}
     {% endif %}
