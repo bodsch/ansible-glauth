@@ -32,7 +32,7 @@ provisioner:
     # - -vv
   config_options:
     defaults:
-      deprecation_warnings: True
+      deprecation_warnings: true
       stdout_callback: yaml
 
 scenario:

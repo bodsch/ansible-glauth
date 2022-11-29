@@ -24,15 +24,6 @@
   ansible.builtin.package:
     update_cache: true
 
-- name: define delegate instance for download handling
-  ansible.builtin.set_fact:
-    glauth_delegate_to: "{{ ansible_host }}"
-    glauth_local_tmp_directory: "{{
-        lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
-        default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
-  when:
-    - glauth_direct_download
-
 - name: install dependency
   ansible.builtin.package:
     name: "{{ glauth_requirements }}"
@@ -65,6 +56,15 @@
     - name: re-define glauth_version
       ansible.builtin.set_fact:
         glauth_version: "{{ _latest_release.json.tag_name[1:] }}"
+
+- name: define delegate instance for download handling
+  ansible.builtin.set_fact:
+    glauth_delegate_to: "{{ ansible_host }}"
+    glauth_local_tmp_directory: "{{
+        lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
+        default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
+  when:
+    - glauth_direct_download
 
 - name: detect our installation path '{{ glauth_install_path | dirname }}'
   ansible.builtin.stat:

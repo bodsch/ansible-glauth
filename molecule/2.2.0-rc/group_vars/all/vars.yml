@@ -56,8 +56,6 @@ glauth_users:
     login_shell: ""
     home_dir: ""
     capabilities:
-#      "*":
-#        object: "dc=matrix,dc=lan"
       "*":
         object: "dc=molecule,dc=lan"
     custom_attrs:
@@ -85,8 +83,6 @@ glauth_users:
     login_shell: "/bin/bash"
     home_dir: "/home/bodsch"
     capabilities:
-#      "search":
-#        object: "dc=matrix,dc=lan"
       "search":
         object: "dc=molecule,dc=lan"
 
