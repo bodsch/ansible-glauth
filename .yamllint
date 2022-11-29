@@ -16,9 +16,5 @@ rules:
 #   comments-indentation: disable
 
 ignore: |
-  tests/
   molecule/
-  .molecule/
-  .travis.yml
-  .tox
   .github

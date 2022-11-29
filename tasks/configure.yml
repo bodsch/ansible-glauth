@@ -1,7 +1,7 @@
 ---
 
 - name: create glauth configuration directory
-  file:
+  ansible.builtin.file:
     path: "{{ glauth_config_dir }}"
     state: directory
     owner: root
@@ -9,7 +9,7 @@
     mode: 0775
 
 - name: create certificate directory
-  file:
+  ansible.builtin.file:
     path: "{{ glauth_config_dir }}/certs"
     state: directory
     owner: "{{ glauth_system_user }}"
@@ -17,7 +17,7 @@
     mode: 0770
 
 - name: create glauth.conf
-  template:
+  ansible.builtin.template:
     src: "glauth/glauth.conf.j2"
     dest: "{{ glauth_config_dir }}/glauth.conf"
     force: true
@@ -29,6 +29,6 @@
     - reload glauth
 
 - name: restart glauth if needed
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 ...

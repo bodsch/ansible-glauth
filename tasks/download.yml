@@ -4,7 +4,7 @@
   delegate_to: localhost
   become: false
   run_once: true
-  uri:
+  ansible.builtin.uri:
     url: "{{ glauth_release_api_url }}"
     method: GET
     return_content: true
@@ -22,21 +22,21 @@
   delegate_to: localhost
   become: false
   run_once: true
-  set_fact:
+  ansible.builtin.set_fact:
     glauth_download_url: "{{ _glauth_release.json | release_version('glauth', glauth_version, ansible_facts.system | lower, system_architecture) }}"
 
 - name: define download artefact
   delegate_to: localhost
   become: false
   run_once: true
-  set_fact:
+  ansible.builtin.set_fact:
     glauth_download_artefact: "{{ glauth_local_tmp_directory }}/{{ glauth_download_url | basename }}"
 
 - name: locate previously downloaded artefacts '{{ glauth_download_url | basename }}'
   delegate_to: localhost
   become: false
   run_once: true
-  stat:
+  ansible.builtin.stat:
     path: "{{ glauth_download_artefact }}"
   register: stat_glauth_downloaded_artefact
 
@@ -44,9 +44,10 @@
   become: false
   delegate_to: "{{ glauth_delegate_to }}"
   run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ glauth_download_url }}"
     dest: "{{ glauth_download_artefact }}"
+    mode: 0640
     # checksum: "sha256:{{ __glauth_checksum }}"
   register: _download_archive
   until: _download_archive is succeeded
@@ -61,7 +62,7 @@
   delegate_to: localhost
   become: false
   run_once: true
-  stat:
+  ansible.builtin.stat:
     path: "{{ glauth_download_artefact }}"
   register: stat_glauth_downloaded_artefact
 
@@ -69,7 +70,7 @@
   become: false
   delegate_to: "{{ glauth_delegate_to }}"
   run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
-  unarchive:
+  ansible.builtin.unarchive:
     src: "{{ glauth_download_artefact }}"
     dest: "{{ glauth_local_tmp_directory }}"
     copy: false
