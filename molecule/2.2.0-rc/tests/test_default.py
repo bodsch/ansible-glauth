@@ -52,7 +52,6 @@ def read_ansible_yaml(file_name, role_name):
 
     return f"file={read_file} name={role_name}"
 
-
 @pytest.fixture()
 def get_vars(host):
     """
@@ -98,7 +97,6 @@ def get_vars(host):
     result = templar.template(ansible_vars, fail_on_undefined=False)
 
     return result
-
 
 def local_facts(host):
     """
