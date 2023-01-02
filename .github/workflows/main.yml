@@ -32,7 +32,6 @@ jobs:
           - archlinux:latest
           - artixlinux:latest
         ansible-version:
-          - '5.1'
           - '6.1'
         scenario:
           - default
@@ -73,7 +72,6 @@ jobs:
           - debian:11
           - ubuntu:20.04
         ansible-version:
-          - '5.1'
           - '6.1'
         scenario:
           - default
