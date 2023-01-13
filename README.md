@@ -158,6 +158,41 @@ glauth_frontends: {}
 | ``        | 2.1            | ``      | `-`     |             |
 
 
+#### Passwords
+
+##### sha256
+
+A password has the following structure:
+`$2y$2^<number of rounds>$<salt>$<hash>`
+
+e.g: `$2a$12$vXQCX9zGGAj22vNazNrBz.pBCWsUuLH.QBLImlra61i70D/MFDhKa`
+
+##### bcrypt
+
+In the configuration file, the password is "coded" in hexadecimal numbers, i.e. each character is replaced by two characters from 0-9 and A-F.
+
+You need [xxd](https://command-not-found.com/xxd) for the following steps:
+
+If you want to insert a bcrypt string into the config, you have to convert your brcrypt password to hexadecimal representation.
+
+```shell
+python -c 'import bcrypt; print(bcrypt.hashpw(b"clear-text-passwd43", bcrypt.gensalt(rounds=15)).decode("ascii"))'
+$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
+
+echo '$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO' | xxd -p -c 150
+243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a
+```
+The result can then be used in the configuration.
+
+You can check the string in the following way
+```shell
+echo 243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a | xxd -r -p
+$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
+```
+
+For the 2a vs. 2y prefix, see [stackoverflow](https://stackoverflow.com/a/36225192).
+
+
 ```yaml
 glauth_users:
   admin:
