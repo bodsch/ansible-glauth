@@ -57,10 +57,6 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 | parameter | glauth version | type    | default | description |
 | :---      | :---           | :---    | :---    | :---        |
 | ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
 
 ```yaml
 glauth_service: {}
@@ -288,6 +284,18 @@ glauth_api:
   listen:
     address: "0.0.0.0"
 ```
+### Config for this role
+
+| parameter                    | type      | default                                      | description |
+| :---                         | :---      | :---                                         | :---        |
+| `glauth_version`             | `string`  | `2.1.0`                                      | The version of glauth to install. Use `latest` to install the latest release version, but use with caution. |
+| `glauth_system_user`         | `string`  | `glauth`                                     | User as which glauth shall run |
+| `glauth_system_group`        | `string`  | `glauth`                                     | Group as which glauth shall run |
+| `glauth_config_dir`          | `string`  | `/etc/glauth`                                | Directory with configuration for glauth |
+| `glauth_data_dir`            | `string`  | `/var/lib/glauth`                            | Plugins will be installed into a subdirectory plugins/ of this directory |
+| `glauth_install_path`        | `string`  | `/usr/local/bin/glauth/{{ glauth_version }}` | Location to install glauth to, it will be linked to `/usr/bin/glauth`, though |
+| `glauth_direct_download`     | `bool`    | `false`                                      | Either download and unpack glauth on the local machine (`false`, or download it directly on the target host (`true`) |
+| `glauth_local_tmp_directory` | `string`  | environment variable `CUSTOM_LOCAL_TMP_DIRECTORY`<br/>or `~/.cache/ansible/glauth/{{ glauth_version }}` | Path where to locally download glauth to |
 
 
 
