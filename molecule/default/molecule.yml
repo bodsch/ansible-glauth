@@ -27,6 +27,10 @@ platforms:
 
 provisioner:
   name: ansible
+  # inventory:
+  #   host_vars:
+  #     instance:
+  #       ansible_user: ansible
   ansible_args:
     - --diff
     # - -vv

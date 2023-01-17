@@ -3,6 +3,7 @@
 - name: propagate glauth plugins
   block:
     - name: create plugins directory for installed version
+      become: true
       ansible.builtin.file:
         state: directory
         path: "{{ glauth_install_path }}/plugins"
@@ -11,6 +12,7 @@
         group: "{{ glauth_system_group }}"
 
     - name: copy plugins in place
+      become: true
       ansible.builtin.copy:
         src: "{{ glauth_local_tmp_directory }}/{{ item }}"
         dest: "{{ glauth_install_path }}/plugins/"
@@ -23,6 +25,7 @@
         - reload glauth
 
 - name: create link to plugins
+  become: true
   ansible.builtin.file:
     state: link
     src: "{{ glauth_install_path }}/plugins"

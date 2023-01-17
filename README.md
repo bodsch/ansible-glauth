@@ -19,7 +19,7 @@ If `latest` is set for `glauth_version`, the role tries to install the latest re
 The binaries are installed below `/usr/local/bin/glauth/${glauth_version}` and later linked to `/usr/bin`. 
 This should make it possible to downgrade relatively safely.
 
-The Prometheus archive is stored on the Ansible controller, unpacked and then the binaries are copied to the target system.
+The downloaded archive is stored on the Ansible controller, unpacked and then the binaries are copied to the target system.
 The cache directory can be defined via the environment variable `CUSTOM_LOCAL_TMP_DIRECTORY`. 
 By default it is `${HOME}/.cache/ansible/glauth`.
 If this type of installation is not desired, the download can take place directly on the target system. 
@@ -59,7 +59,17 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 | ``        | 2.1            | ``      | `-`     |             |
 
 ```yaml
-glauth_service: {}
+glauth_service:
+  aws:
+    key_id: ""
+    secret_key: ""
+    region: ""
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
 ```
 
 ### `glauth_config`
@@ -73,7 +83,16 @@ glauth_service: {}
 | `yubikey.secret`   | 2.1            | `string` | `-`     |             |
 
 ```yaml
-glauth_config: {}
+glauth_config:
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
 ```
 
 ### `glauth_backends`
@@ -99,21 +118,6 @@ glauth_backends:
     base_dn: "dc=molecule,dc=lan"
     name_format: "cn"
     group_format: "ou"
-```
-
-### `glauth_frontends`
-
-| parameter         | glauth version | type      | default  | description |
-| :---              | :---           | :---      | :---     | :---        |
-| `allowed_base_dn` | 2.1            | `string`  | `-`      |             |
-| `listen.address`  | 2.1            | `string`  | `0.0.0.0`|             |
-| `listen.port`     | 2.1            | `int`     | `5555`   |             |
-| `tls.enabled`     | 2.1            | `bool`    | `-`      |             |
-| `tls.cert_file`   | 2.1            | `string`  | `-`      |             |
-| `tls.key_file`    | 2.1            | `string`  | `-`      |             |
-
-```yaml
-glauth_frontends: {}
 ```
 
 ### `glauth_users`
@@ -296,9 +300,6 @@ glauth_api:
 | `glauth_install_path`        | `string`  | `/usr/local/bin/glauth/{{ glauth_version }}` | Location to install glauth to, it will be linked to `/usr/bin/glauth`, though |
 | `glauth_direct_download`     | `bool`    | `false`                                      | Either download and unpack glauth on the local machine (`false`, or download it directly on the target host (`true`) |
 | `glauth_local_tmp_directory` | `string`  | environment variable `CUSTOM_LOCAL_TMP_DIRECTORY`<br/>or `~/.cache/ansible/glauth/{{ glauth_version }}` | Path where to locally download glauth to |
-
-
-
 
 ---
 

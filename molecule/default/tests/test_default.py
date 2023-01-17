@@ -166,13 +166,14 @@ def test_user(host, get_vars):
     assert host.user(user).home == "/nonexistent"
 
 
-def test_service(host, get_vars):
+def test_service(host):
     service = host.service("glauth")
-    assert service.is_enabled
+    print(service)
     assert service.is_running
+    assert service.is_enabled
 
 
-def test_open_port(host, get_vars):
+def test_open_port(host):
     """
     """
     listen_address = "0.0.0.0:389"

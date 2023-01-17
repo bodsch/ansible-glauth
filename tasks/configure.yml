@@ -1,6 +1,7 @@
 ---
 
 - name: create glauth configuration directory
+  become: true
   ansible.builtin.file:
     path: "{{ glauth_config_dir }}"
     state: directory
@@ -9,6 +10,7 @@
     mode: 0775
 
 - name: create certificate directory
+  become: true
   ansible.builtin.file:
     path: "{{ glauth_config_dir }}/certs"
     state: directory
@@ -17,6 +19,7 @@
     mode: 0770
 
 - name: create glauth.conf
+  become: true
   ansible.builtin.template:
     src: "glauth/glauth.conf.j2"
     dest: "{{ glauth_config_dir }}/glauth.conf"
