@@ -1,0 +1,36 @@
+---
+
+- name: propagate glauth plugins
+  block:
+    - name: create plugins directory for installed version
+      become: true
+      ansible.builtin.file:
+        state: directory
+        path: "{{ glauth_install_path }}/plugins"
+        mode: 0755
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+
+    - name: copy plugins in place
+      become: true
+      ansible.builtin.copy:
+        src: "{{ glauth_local_tmp_directory }}/{{ item }}"
+        dest: "{{ glauth_install_path }}/plugins/"
+        mode: 0644
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+        remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
+      loop: "{{ glauth_plugins }}"
+      notify:
+        - reload glauth
+
+- name: create link to plugins
+  become: true
+  ansible.builtin.file:
+    state: link
+    src: "{{ glauth_install_path }}/plugins"
+    dest: "{{ glauth_data_dir }}/plugins"
+    force: true
+    follow: false
+
+...

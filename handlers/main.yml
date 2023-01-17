@@ -2,22 +2,25 @@
 
 - name: restart glauth
   become: true
-  service:
+  ansible.builtin.service:
     name: glauth
     state: restarted
 
 - name: reload glauth
   become: true
-  service:
+  ansible.builtin.service:
     name: glauth
     state: reloaded
 
 - name: validate config
-  command: /bin/true
+  ansible.builtin.command: |
+    glauth --check-config -c {{ glauth_config_dir }}/glauth.conf
+  when:
+    - glauth_version is version_compare('2.2.0', '>=')
 
 - name: daemon-reload
   become: true
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
     force: true
   when:

@@ -5,7 +5,6 @@
 
 from __future__ import absolute_import, division, print_function
 from ansible.module_utils.basic import AnsibleModule
-import json
 import toml
 
 
@@ -26,8 +25,6 @@ class GlAuthBackends(object):
         """
           runner
         """
-        result_state = []
-
         result = dict(
             rc=0,
             failed=False,
@@ -38,20 +35,15 @@ class GlAuthBackends(object):
         toml_data = toml.load("/etc/glauth/glauth.conf")
         glauth_backends = toml_data.get('backends')
 
-        self.module.log(msg=f"  - '{glauth_backends}'")
-        # self.module.log(msg=f"  - '{glauth_backends.keys()}")
-
         for backend in glauth_backends:
-            if backend.get("datastore") == "plugin" and self.database_type in backend.get("plugin", None):
+            if backend.get("datastore") == "plugin" and self.database_type in backend.get("plugin",
+                                                                                          None):
                 break
-
-        self.module.log(msg=f"  - '{backend}")
 
         if self.database_type == "sqlite":
             result = self._sqlite(backend)
 
         return result
-
 
     def _sqlite(self, config):
         """
@@ -70,36 +62,32 @@ class GlAuthBackends(object):
             conn = None
 
             try:
-              conn = sqlite3.connect(
-                  database_file,
-                  isolation_level=None,
-                  detect_types=sqlite3.PARSE_COLNAMES
-              )
-              conn.row_factory = lambda cursor, row: row[0]
+                conn = sqlite3.connect(
+                    database_file,
+                    isolation_level=None,
+                    detect_types=sqlite3.PARSE_COLNAMES
+                )
+                conn.row_factory = lambda cursor, row: row[0]
 
-              # self.module.log(msg=f"SQLite Version: '{sqlite3.version}'")
+                # self.module.log(msg=f"SQLite Version: '{sqlite3.version}'")
 
-              schemas = []
-              query = "SELECT name FROM sqlite_schema WHERE type ='table' AND name not LIKE '%metadata%'"
+                query = "SELECT name FROM sqlite_schema WHERE type ='table' AND name not LIKE '%metadata%'"
+                cursor = conn.execute(query)
+                schemas = cursor.fetchall()
+                # self.module.log(msg=f"  - schemas '{schemas}")
+                if len(schemas) == 0:
+                    """
+                      import sql schema
+                    """
+                    # self.module.log(msg="import database schemas")
 
-              cursor = conn.execute(query)
+                    with open("/etc/glauth/databases/sqlite.sql", 'r') as f:
+                        cursor.executescript(f.read())
 
-              schemas = cursor.fetchall()
-              # self.module.log(msg=f"  - '{schemas}")
-
-              if len(schemas) == 0:
-                  """
-                    import sql schema
-                  """
-                  self.module.log(msg="import database schemas")
-
-                  with open("/etc/glauth/databases/sqlite.sql", 'r') as f:
-                      cursor.executescript(f.read())
-
-                  _changed = True
-                  _msg = "Database successfully created."
-              else:
-                  _msg = "Database already exists."
+                    _changed = True
+                    _msg = "Database successfully created."
+                else:
+                    _msg = "Database already exists."
 
             except sqlite3.Error as er:
                 self.module.log(msg=f"SQLite error: '{(' '.join(er.args))}'")
@@ -118,16 +106,22 @@ class GlAuthBackends(object):
             # # Exception raised for errors that are related to the database.
             #
             # exception sqlite3.IntegrityError
-            # # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails. It is a subclass of DatabaseError.
+            # # Exception raised when the relational integrity of the database is affected, e.g. a foreign key check fails.
+            # It is a subclass of DatabaseError.
             #
             # exception sqlite3.ProgrammingError
-            # # Exception raised for programming errors, e.g. table not found or already exists, syntax error in the SQL statement, wrong number of parameters specified, etc. It is a subclass of DatabaseError.
+            # # Exception raised for programming errors, e.g. table not found or already exists, syntax error in the SQL statement,
+            # wrong number of parameters specified, etc. It is a subclass of DatabaseError.
             #
             # exception sqlite3.OperationalError
-            # # Exception raised for errors that are related to the database’s operation and not necessarily under the control of the programmer, e.g. an unexpected disconnect occurs, the data source name is not found, a transaction could not be processed, etc. It is a subclass of DatabaseError.
+            # # Exception raised for errors that are related to the database’s operation and not necessarily under the control of the programmer,
+            # e.g. an unexpected disconnect occurs, the data source name is not found, a transaction could not be processed, etc.
+            # It is a subclass of DatabaseError.
             #
             # exception sqlite3.NotSupportedError
-            # # Exception raised in case a method or database API was used which is not supported by the database, e.g. calling the rollback() method on a connection that does not support transaction or has transactions turned off. It is a subclass of DatabaseError.
+            # # Exception raised in case a method or database API was used which is not supported by the database,
+            # e.g. calling the rollback() method on a connection that does not support transaction or has transactions turned off.
+            # It is a subclass of DatabaseError.
 
             finally:
                 if conn:
@@ -146,12 +140,10 @@ class GlAuthBackends(object):
                 msg=_msg
             )
 
-
         elif self.state == "absent":
             """
             """
             pass
-
 
         return []
 
@@ -162,7 +154,6 @@ class GlAuthBackends(object):
 
 
 def main():
-
     module = AnsibleModule(
         argument_spec=dict(
             state=dict(

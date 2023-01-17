@@ -91,16 +91,6 @@ glauth_defaults_backends: {}
 #     insecure: true
 #   plugin: {}
 
-glauth_defaults_frontends:
-  allowed_base_dn: ""
-  listen:
-    address: "0.0.0.0"
-    port: 0
-  tls:
-    enabled: false
-    cert_file: "certs/server.crt"
-    key_file: "certs/server.key"
-
 glauth_defaults_users: {}
 #   admin:
 #     enabled: true
@@ -160,6 +150,8 @@ glauth_defaults_helper:
 # ----------------------------------------------------------------------------------------
 
 glauth_defaults_directory: /etc/default
+
+glauth_plugins: []
 
 go_arch_map:
   x86_64: 'amd64'

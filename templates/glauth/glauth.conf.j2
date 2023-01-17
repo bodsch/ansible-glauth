@@ -1,5 +1,6 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 # {{ ansible_managed }}
+
 {% include('glauth.d/general.j2') %}
 {% include('glauth.d/ldap.j2') %}
 {% include('glauth.d/ldaps.j2') %}

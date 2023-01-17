@@ -1,7 +1,7 @@
 ---
 
 - name: include OS specific configuration ({{ ansible_distribution }} ({{ ansible_os_family }}) {{ ansible_distribution_major_version }})
-  include_vars: "{{ lookup('first_found', params) }}"
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       paths:
@@ -21,27 +21,28 @@
       skip: true
 
 - name: update package cache
-  package:
+  become: true
+  ansible.builtin.package:
     update_cache: true
 
-- name: define delegate instance for download handling
-  set_fact:
-    glauth_delegate_to: "{{ ansible_host }}"
-    glauth_local_tmp_directory: "{{
-        lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
-        default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
-  when:
-    - glauth_direct_download
-
 - name: install dependency
-  package:
+  become: true
+  ansible.builtin.package:
     name: "{{ glauth_requirements }}"
     state: present
+  when:
+    - glauth_requirements | default([]) | count > 0
 
-- block:
+- name: latest release
+  when:
+    - glauth_version == "latest"
+  block:
     - name: get latest release
-      uri:
-        url: "https://api.github.com/repos/glauth/glauth/releases/latest"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      ansible.builtin.uri:
+        url: "{{ glauth_release_api_url }}/latest"
         method: GET
         return_content: true
         status_code: 200
@@ -54,26 +55,36 @@
       until: _latest_release.status == 200
       retries: 5
 
-    - name: set glauth version to {{ _latest_release.json.tag_name[1:] }}
-      set_fact:
+    - name: re-define glauth_version
+      ansible.builtin.set_fact:
         glauth_version: "{{ _latest_release.json.tag_name[1:] }}"
-  delegate_to: localhost
-  become: false
-  run_once: true
+
+- name: define delegate instance for download handling
+  ansible.builtin.set_fact:
+    glauth_delegate_to: "{{ ansible_host }}"
+    glauth_local_tmp_directory: "{{
+        lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
+        default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
   when:
-    - glauth_version == "latest"
+    - glauth_direct_download
 
 - name: detect our installation path '{{ glauth_install_path | dirname }}'
-  stat:
+  ansible.builtin.stat:
     path: "{{ glauth_install_path | dirname }}"
     get_checksum: false
   register: stat_glauth_path
   ignore_errors: true
 
 - name: old installation
+  when:
+    - stat_glauth_path is defined
+    - stat_glauth_path.stat is defined
+    - stat_glauth_path.stat.isdir is defined
+    - not stat_glauth_path.stat.isdir
   block:
     - name: stop old service
-      service:
+      become: true
+      ansible.builtin.service:
         name: glauth
         state: stopped
         enabled: false
@@ -81,48 +92,41 @@
         - daemon-reload
 
     - name: remove installed systemd unit
-      file:
+      become: true
+      ansible.builtin.file:
         state: absent
         path: /etc/systemd/system/glauth.service
       when:
         - ansible_service_mgr | lower == "systemd"
 
     - name: remove installed glauth
-      file:
+      become: true
+      ansible.builtin.file:
         state: absent
         path: "{{ stat_glauth_path.stat.path }}"
-  when:
-    - stat_glauth_path is defined
-    - stat_glauth_path.stat is defined
-    - stat_glauth_path.stat.isdir is defined
-    - not stat_glauth_path.stat.isdir
 
 - name: flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: detect installed glauth binary
-  stat:
+  ansible.builtin.stat:
     path: "{{ glauth_install_path }}/glauth"
   register: stat_glauth_binary
 
-- name: create download directory
-  become: false
-  delegate_to: "{{ glauth_delegate_to }}"
-  file:
-    path: "{{ glauth_local_tmp_directory }}"
-    state: directory
-    mode: 0750
-
 - name: user and group handling
+  when:
+    - glauth_system_user != "root"
   block:
     - name: create glauth group
-      group:
+      become: true
+      ansible.builtin.group:
         name: "{{ glauth_system_group }}"
         state: present
         system: true
 
     - name: create glauth user
-      user:
+      become: true
+      ansible.builtin.user:
         name: "{{ glauth_system_user }}"
         groups: "{{ glauth_system_group }}"
         append: true
@@ -130,58 +134,41 @@
         system: true
         createhome: false
         home: /nonexistent
-  when:
-    - glauth_system_user != "root"
+
+- name: create download directory
+  become: false
+  delegate_to: "{{ glauth_delegate_to }}"
+  ansible.builtin.file:
+    path: "{{ glauth_local_tmp_directory }}"
+    state: directory
+    mode: 0750
 
 - name: create install directory
-  file:
+  become: true
+  ansible.builtin.file:
     path: "{{ glauth_install_path }}"
     state: directory
     owner: "{{ glauth_system_user }}"
     group: "{{ glauth_system_group }}"
     mode: 0755
 
-- name: create ansible local facts directory
-  file:
+- name: create ansible facts directory
+  become: true
+  ansible.builtin.file:
     dest: /etc/ansible/facts.d
     state: directory
     owner: root
     group: root
     mode: 0775
 
-- name: merge glauth service configuration between defaults and custom
-  set_fact:
-    glauth_service: "{{ glauth_defaults_service |
-      combine( glauth_service, recursive=True) }}"
-
-- name: merge glauth config configuration between defaults and custom
-  set_fact:
-    glauth_config: "{{ glauth_defaults_config |
-      combine( glauth_config, recursive=True) }}"
-
-- name: merge glauth backends configuration between defaults and custom
-  set_fact:
-    glauth_backends: "{{ glauth_defaults_backends |
-      combine( glauth_backends, recursive=True) }}"
-
-- name: merge glauth users configuration between defaults and custom
-  set_fact:
-    glauth_users: "{{ glauth_defaults_users |
-      combine( glauth_users, recursive=True) }}"
-
-- name: merge glauth groups configuration between defaults and custom
-  set_fact:
-    glauth_groups: "{{ glauth_defaults_groups |
-      combine( glauth_groups, recursive=True) }}"
-
-- name: merge glauth behaviors configuration between defaults and custom
-  set_fact:
-    glauth_behaviors: "{{ glauth_defaults_behaviors |
-      combine( glauth_behaviors, recursive=True) }}"
-
-- name: merge glauth api configuration between defaults and custom
-  set_fact:
-    glauth_api: "{{ glauth_defaults_api |
-      combine( glauth_api, recursive=True) }}"
+- name: merge glauth configuration between defaults and custom
+  ansible.builtin.set_fact:
+    glauth_service: "{{ glauth_defaults_service | combine(glauth_service, recursive=True) }}"
+    glauth_config: "{{ glauth_defaults_config | combine(glauth_config, recursive=True) }}"
+    glauth_backends: "{{ glauth_defaults_backends | combine(glauth_backends, recursive=True) }}"
+    glauth_users: "{{ glauth_defaults_users | combine(glauth_users, recursive=True) }}"
+    glauth_groups: "{{ glauth_defaults_groups | combine(glauth_groups, recursive=True) }}"
+    glauth_behaviors: "{{ glauth_defaults_behaviors | combine(glauth_behaviors, recursive=True) }}"
+    glauth_api: "{{ glauth_defaults_api | combine(glauth_api, recursive=True) }}"
 
 ...

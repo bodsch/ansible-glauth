@@ -3,6 +3,9 @@
   {% for user, values in glauth_users.items() %}
 [[users]]
   name          = "{{ user }}"
+    {% if not values.enabled | default('false') | bool  %}
+  disabled = true
+    {% endif %}
     {% if values.uid | default('') | int > 0  %}
   uidnumber     = {{ values.uid | int }}
     {% endif %}
@@ -32,6 +35,17 @@
   ]
     {% endif %}
     {% if values.pass.bcrypt | default('') | string | length > 0 %}
+  passbcrypt    = "{{ values.pass.bcrypt }}"
+    {% endif %}
+    {% if values.pass.bcrypt_apps | default([]) | count > 0 %}
+  passappbcrypt = [
+    "{{ values.pass.bcrypt_apps | join("\",\n\"") | indent(4) }}"
+  ]
+    {% endif %}
+    {% if values.otp_secret | default('') | string | length > 0 %}
+  otpsecret     = "{{ values.otp_secret }}"
+    {% endif %}
+    {% if values.pass.bcrypt | default('') | string | length > 0 %}
   bcrypt        = "{{ values.pass.bcrypt }}"
     {% endif %}
     {% if values.pass.bcrypt_apps | default([]) | count > 0 %}
@@ -51,6 +65,21 @@
   [[users.capabilities]]
     action = "{{ cap }}"
     object = "{{ obj.object }}"
+      {% endfor %}
+    {% endif %}
+
+    {% if values.custom_attrs is defined and
+          values.custom_attrs | count > 0 %}
+      {% for key, value in values.custom_attrs.items() %}
+  [[users.customattributes]]
+        {% if value | type == "list" %}
+    {{ key }} = [
+          {% set _, result_value = value | has_valid_values %}
+      {{ result_value | join(",\n") | indent(6) }}
+  ]
+        {% elif value | type == "str" %}
+    {{ key }} = "{{ value }}"
+        {% endif %}
       {% endfor %}
     {% endif %}
 

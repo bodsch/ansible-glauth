@@ -1,7 +1,8 @@
 ---
 
 - name: create glauth configuration directory
-  file:
+  become: true
+  ansible.builtin.file:
     path: "{{ glauth_config_dir }}"
     state: directory
     owner: root
@@ -9,7 +10,8 @@
     mode: 0775
 
 - name: create certificate directory
-  file:
+  become: true
+  ansible.builtin.file:
     path: "{{ glauth_config_dir }}/certs"
     state: directory
     owner: "{{ glauth_system_user }}"
@@ -17,7 +19,8 @@
     mode: 0770
 
 - name: create glauth.conf
-  template:
+  become: true
+  ansible.builtin.template:
     src: "glauth/glauth.conf.j2"
     dest: "{{ glauth_config_dir }}/glauth.conf"
     force: true
@@ -29,20 +32,20 @@
     - reload glauth
 
 - name: copy sql scripts
-  copy:
+  ansible.builtin.copy:
     src: databases
     dest: "{{ glauth_config_dir }}/"
     group: "{{ glauth_system_group }}"
     mode: 0750
 
 - name: create database backends
-  include_tasks: backends/sqlite.yml
+  ansible.builtin.include_tasks: backends/sqlite.yml
   when:
     - glauth_backends.sqlite is defined
     - glauth_backends.sqlite.enabled is defined
     - glauth_backends.sqlite.enabled
 
 - name: restart glauth if needed
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 ...

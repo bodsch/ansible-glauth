@@ -1,38 +1,81 @@
 ---
 
-# - block:
-#     - name: get checksum list
-#       set_fact:
-#         __glauth_checksums: "{{ lookup('url', 'https://github.com/glauth/glauth/releases/download/v' + glauth_version + '/sha256sums.txt', wantlist=True) | list }}"
-#       run_once: true
-#
-#     - name: get checksum for {{ go_arch }} architecture
-#       set_fact:
-#         __glauth_checksum: "{{ __glauth_checksums | glauth_checksum('linux', go_arch) }}"
-#   delegate_to: localhost
+- name: get releases
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.uri:
+    url: "{{ glauth_release_api_url }}"
+    method: GET
+    return_content: true
+    status_code: 200
+    body_format: json
+    validate_certs: false
+    user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
+    password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
+  # no_log: "{{ not lookup('env', 'ANSIBLE_DEBUG') | bool }}"
+  register: _glauth_release
+  until: _glauth_release.status == 200
+  retries: 5
+
+- name: define download url
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.set_fact:
+    glauth_download_url: "{{ _glauth_release.json | release_version('glauth', glauth_version, ansible_facts.system | lower, system_architecture) }}"
+
+- name: define download artefact
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.set_fact:
+    glauth_download_artefact: "{{ glauth_local_tmp_directory }}/{{ glauth_download_url | basename }}"
+
+- name: locate previously downloaded artefacts '{{ glauth_download_url | basename }}'
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.stat:
+    path: "{{ glauth_download_artefact }}"
+  register: stat_glauth_downloaded_artefact
 
 - name: download glauth binary archive
   become: false
   delegate_to: "{{ glauth_delegate_to }}"
   run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
-  get_url:
-    url: "{{ glauth_release_download_url }}/download/v{{ glauth_version }}/{{ ansible_facts.system }}{{ system_architecture }}.zip"
-    dest: "{{ glauth_local_tmp_directory }}/glauth-{{ system_architecture }}.zip"
+  ansible.builtin.get_url:
+    url: "{{ glauth_download_url }}"
+    dest: "{{ glauth_download_artefact }}"
+    mode: 0640
     # checksum: "sha256:{{ __glauth_checksum }}"
   register: _download_archive
   until: _download_archive is succeeded
   retries: 5
   delay: 2
   check_mode: false
+  ignore_errors: true
+  when:
+    - not stat_glauth_downloaded_artefact.stat.exists | default('false')
+
+- name: verify downloaded artefact '{{ glauth_download_url | basename }}'
+  delegate_to: localhost
+  become: false
+  run_once: true
+  ansible.builtin.stat:
+    path: "{{ glauth_download_artefact }}"
+  register: stat_glauth_downloaded_artefact
 
 - name: extract glauth archive
   become: false
   delegate_to: "{{ glauth_delegate_to }}"
   run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
-  unarchive:
-    src: "{{ glauth_local_tmp_directory }}/glauth-{{ system_architecture }}.zip"
+  ansible.builtin.unarchive:
+    src: "{{ glauth_download_artefact }}"
     dest: "{{ glauth_local_tmp_directory }}"
     copy: false
   register: _extract_archive
+  when:
+    - stat_glauth_downloaded_artefact.stat.mimetype == "application/zip"
 
 ...

@@ -12,8 +12,6 @@
     groups: "{{ glauth_groups }}"
     users: "{{ glauth_users }}"
   when:
-    - (glauth_users is defined and
-       glauth_users | count > 0) or
-      (glauth_groups is defined and
-       glauth_groups | count > 0)
+    - (glauth_users is defined and glauth_users | count > 0) or
+      (glauth_groups is defined and glauth_groups | count > 0)
 ...

@@ -81,12 +81,12 @@ glauth_users:
     primary_group: 4000
     other_groups:
       - 4001
+      - 4005
     pass:
       # echo -n "xxx" | openssl dgst -sha256
       sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
     ssh_keys:
-      - ssh-dss AAAAB3NzaC1kc3MAAAEBAIvKoTLQb6EgAvGVWzhTw2QqoXT3zADW7RHa2aml8+zrZXu1RHSIAeX8o2oJsl/Q8IFOq6TKQ+N4Ab89JinbGLze/2/8BI2sypZLmfMjiA1+hJq6bjC7ZzSwdvPt1Jc57d/TSo99mAsyBx2IOsTobnjSetN0lyp3RNv3lwxkES3pcM6VsCu30gF5r22eFlaGsV/OejZ5Ul2ks5OblmOXTChC5l4oDzukauRUkAFag/ph9JJDSoX5F+oYMEvf5nJI9MEH9ADyM2s3yYEfgxVkpv3TEEVbYY6lpJuS+G9D6V1NQm1GFgAGms+3Nmb1VgKgqFn4WX/CIseng46Cyo4m6lMAAAAVALHwKJt7fRjirHwJeg0A3H3knKlfAAABAFHCOpIysIVNb8tozx+8L3pFVw4+QAxmZlVJrf2Y6ghcKNUwo1O6iZ3c+q8o/DKdK5HQGVLILmeDOLQ8S4bwAViXZ5bnR6UUGJFpU7npqdyk2R0rBYzcP29TGGdMy4tpmkkmGgxTzY0Z8C/17R6zTfHHRnWTNRE5jTTAr+7sAGvlH3NRCGYT3rmfamVX4ekVJ618HJOuTCN1U2RQXe/uJE6EiqL4fg0VfMY/iqnqpD8/Q76E8GTFTTeurRIK45dG+C8omGO1+xWt4EGubAEiNhNkRsaSHpLr5P1rTy63PcYEyZJdxsKq63bgCWYuYmGn1+ZEqIxw7FyFdxo5WTCs+cAAAAEAH9RDwGZ/Lc622hobcvHmcxmJFzhBWPvrR5uI7bwGz8LvIQ8zZHsN2QD2pYgnwmt8RJmX1ErJVklOdmCGF/NVOkQ3pQ1TJHHogl+hwfeITUmPNXsbdimG2Z2ybki2GebWUOsk9kNzUIccFmAGM9vogmudjHYfXEkLI99ca1kqLg0nfCCm5K1EU6kKNAwXPl9fJZLDFL/buA0yVRWAoOu5tKVKDpDiYGnUk/uL9rdvo50zc2n7cOu0Peg1lLmAmNnvmtgzskW3CNl1snvv5i/WXco18cQp6PvPvpn2Cy7FMRK4h1LfTrOojCiGQUJps6e2dVhhmjQ2uEn8zSmiYUw65w== dodger@nb_schulz
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHUuPrbu9kSKL1u0gfViSa/P7FkZPk8hYbv7hegpTcY bodo@boone-schulz.de
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AxxxxxxxxPrbu9kSKL1u0gfViSa/P7FkZPk8hYbv7hegpTcY bodsch
     login_shell: "/bin/bash"
     home_dir: "/home/bodsch"
     capabilities:
@@ -102,7 +102,7 @@ glauth_users:
       # echo -n "xxx" | openssl dgst -sha256
       sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
       #
-      bcrypt: "$2y$10$2NyN8Hl6C41BWeM511ebUusp/EmSn1sIhdWLbEC3ib54guXyRmE9O"
+      bcrypt: "62352f6546675974585043714a4356502e374173324f47414b5964374355303377304d4942794c63464f535948306c430a"
     login_shell: "/bin/bash"
     home_dir: "/home/foo"
     custom_attrs:

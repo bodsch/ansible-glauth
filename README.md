@@ -3,14 +3,15 @@
 
 Ansible role to install and configure [glauth](https://github.com/glauth/glauth).
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bodsch/ansible-glauth/CI)][ci]
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-glauth/main.yml?branch=main)][ci]
 [![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-glauth)][issues]
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-glauth)][releases]
+[![Ansible Quality Score](https://img.shields.io/ansible/quality/50067?label=role%20quality)][quality]
 
 [ci]: https://github.com/bodsch/ansible-glauth/actions
 [issues]: https://github.com/bodsch/ansible-glauth/issues?q=is%3Aopen+is%3Aissue
 [releases]: https://github.com/bodsch/ansible-glauth/releases
-
+[quality]: https://galaxy.ansible.com/bodsch/glauth
 
 If `latest` is set for `glauth_version`, the role tries to install the latest release version.  
 **Please use this with caution, as incompatibilities between releases may occur!**
@@ -18,7 +19,7 @@ If `latest` is set for `glauth_version`, the role tries to install the latest re
 The binaries are installed below `/usr/local/bin/glauth/${glauth_version}` and later linked to `/usr/bin`. 
 This should make it possible to downgrade relatively safely.
 
-The Prometheus archive is stored on the Ansible controller, unpacked and then the binaries are copied to the target system.
+The downloaded archive is stored on the Ansible controller, unpacked and then the binaries are copied to the target system.
 The cache directory can be defined via the environment variable `CUSTOM_LOCAL_TMP_DIRECTORY`. 
 By default it is `${HOME}/.cache/ansible/glauth`.
 If this type of installation is not desired, the download can take place directly on the target system. 
@@ -56,13 +57,19 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 | parameter | glauth version | type    | default | description |
 | :---      | :---           | :---    | :---    | :---        |
 | ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
-| ``        | 2.1            | ``      | `-`     |             |
 
 ```yaml
-glauth_service: {}
+glauth_service:
+  aws:
+    key_id: ""
+    secret_key: ""
+    region: ""
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
 ```
 
 ### `glauth_config`
@@ -76,7 +83,16 @@ glauth_service: {}
 | `yubikey.secret`   | 2.1            | `string` | `-`     |             |
 
 ```yaml
-glauth_config: {}
+glauth_config:
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
 ```
 
 ### `glauth_backends`
@@ -102,21 +118,6 @@ glauth_backends:
     base_dn: "dc=molecule,dc=lan"
     name_format: "cn"
     group_format: "ou"
-```
-
-### `glauth_frontends`
-
-| parameter         | glauth version | type      | default  | description |
-| :---              | :---           | :---      | :---     | :---        |
-| `allowed_base_dn` | 2.1            | `string`  | `-`      |             |
-| `listen.address`  | 2.1            | `string`  | `0.0.0.0`|             |
-| `listen.port`     | 2.1            | `int`     | `5555`   |             |
-| `tls.enabled`     | 2.1            | `bool`    | `-`      |             |
-| `tls.cert_file`   | 2.1            | `string`  | `-`      |             |
-| `tls.key_file`    | 2.1            | `string`  | `-`      |             |
-
-```yaml
-glauth_frontends: {}
 ```
 
 ### `glauth_users`
@@ -176,6 +177,41 @@ b'$2b$10$8GTQxz.fgT3XNj2W7ruhmuXS/YMlakp/ZL5UkbDz1y2uIrbYNSwim'
 | :---      | :---           | :---    | :---    | :---        |
 | ``        | 2.1            | ``      | `-`     |             |
 | ``        | 2.1            | ``      | `-`     |             |
+
+
+#### Passwords
+
+##### sha256
+
+A password has the following structure:
+`$2y$2^<number of rounds>$<salt>$<hash>`
+
+e.g: `$2a$12$vXQCX9zGGAj22vNazNrBz.pBCWsUuLH.QBLImlra61i70D/MFDhKa`
+
+##### bcrypt
+
+In the configuration file, the password is "coded" in hexadecimal numbers, i.e. each character is replaced by two characters from 0-9 and A-F.
+
+You need [xxd](https://command-not-found.com/xxd) for the following steps:
+
+If you want to insert a bcrypt string into the config, you have to convert your brcrypt password to hexadecimal representation.
+
+```shell
+python -c 'import bcrypt; print(bcrypt.hashpw(b"clear-text-passwd43", bcrypt.gensalt(rounds=15)).decode("ascii"))'
+$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
+
+echo '$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO' | xxd -p -c 150
+243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a
+```
+The result can then be used in the configuration.
+
+You can check the string in the following way
+```shell
+echo 243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a | xxd -r -p
+$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
+```
+
+For the 2a vs. 2y prefix, see [stackoverflow](https://stackoverflow.com/a/36225192).
 
 
 ```yaml
@@ -273,9 +309,18 @@ glauth_api:
   listen:
     address: "0.0.0.0"
 ```
+### Config for this role
 
-
-
+| parameter                    | type      | default                                      | description |
+| :---                         | :---      | :---                                         | :---        |
+| `glauth_version`             | `string`  | `2.1.0`                                      | The version of glauth to install. Use `latest` to install the latest release version, but use with caution. |
+| `glauth_system_user`         | `string`  | `glauth`                                     | User as which glauth shall run |
+| `glauth_system_group`        | `string`  | `glauth`                                     | Group as which glauth shall run |
+| `glauth_config_dir`          | `string`  | `/etc/glauth`                                | Directory with configuration for glauth |
+| `glauth_data_dir`            | `string`  | `/var/lib/glauth`                            | Plugins will be installed into a subdirectory plugins/ of this directory |
+| `glauth_install_path`        | `string`  | `/usr/local/bin/glauth/{{ glauth_version }}` | Location to install glauth to, it will be linked to `/usr/bin/glauth`, though |
+| `glauth_direct_download`     | `bool`    | `false`                                      | Either download and unpack glauth on the local machine (`false`, or download it directly on the target host (`true`) |
+| `glauth_local_tmp_directory` | `string`  | environment variable `CUSTOM_LOCAL_TMP_DIRECTORY`<br/>or `~/.cache/ansible/glauth/{{ glauth_version }}` | Path where to locally download glauth to |
 
 ---
 
