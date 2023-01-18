@@ -3,13 +3,13 @@
 - name: prepare
   ansible.builtin.include_tasks: prepare.yml
 
-# - name: download
-#   ansible.builtin.include_tasks: download.yml
-#   when:
-#     - not stat_glauth_binary.stat.exists
-#
-# - name: install
-#   ansible.builtin.include_tasks: install/main.yml
+- name: download
+  ansible.builtin.include_tasks: download.yml
+  when:
+    - not stat_glauth_binary.stat.exists
+
+- name: install
+  ansible.builtin.include_tasks: install/main.yml
 
 - name: configure
   ansible.builtin.include_tasks: configure/main.yml
