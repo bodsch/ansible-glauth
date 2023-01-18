@@ -35,6 +35,6 @@ rules:
   trailing-spaces: disable
   truthy: disable
 
-ignore: |
-  molecule/
-  .github
+#ignore: |
+#  molecule/
+#  .github
