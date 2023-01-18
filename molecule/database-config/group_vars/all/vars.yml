@@ -1,0 +1,124 @@
+---
+
+# glauth_version: latest
+
+glauth_service:
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_config:
+  syslog: true
+  debug: true
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_backends:
+  config:
+    base_dn: "dc=molecule,dc=lan"
+    name_format: "cn"
+    group_format: "ou"
+  sqlite:
+    enabled: true
+    base_dn: "dc=molecule,dc=lan"
+    database: "glauth.db"
+
+glauth_groups:
+  admins:
+    gid: 3000
+  users:
+    gid: 4000
+    include_groups:
+      - 4001
+  grafana:
+    gid: 4001
+
+  vpn:
+    gid: 4005
+    include_groups:
+      - 5000
+      - 5001
+
+
+glauth_users:
+  admin:
+    enabled: true
+    given_name: Admin
+    sn: ""
+    mail: "admin@matrix.lan"
+    uid: 3000
+    primary_group: 3000
+    other_groups: []
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+      sha256_apps: []
+      bcrypt: ""
+      bcrypt_apps: []
+    ssh_keys: []
+    otp_secret: ""
+    yubikey: ""
+    login_shell: ""
+    home_dir: ""
+    capabilities:
+      search:
+        object: "*"
+    custom_attrs: {}
+
+  bodsch:
+    given_name: "Bo"
+    sn: "Sch"
+    uid: 4000
+    primary_group: 4000
+    other_groups:
+      - 4001
+      - 4005
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+    ssh_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AxxxxxxxxPrbu9kSKL1u0gfViSa/P7FkZPk8hYbv7hegpTcY bodsch
+    login_shell: "/bin/bash"
+    home_dir: "/home/bodsch"
+    capabilities:
+      search:
+        object: "dc=molecule,dc=lan"
+
+  foo:
+    given_name: "F"
+    sn: "oo"
+    uid: 4001
+    primary_group: 4000
+    pass:
+      # echo -n "xxx" | openssl dgst -sha256
+      sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+      #
+      bcrypt: "62352f6546675974585043714a4356502e374173324f47414b5964374355303377304d4942794c63464f535948306c430a"
+    login_shell: "/bin/bash"
+    home_dir: "/home/foo"
+    custom_attrs:
+      employeetype:
+        - Intern
+        - Temp
+      employeenumber:
+        - 12345
+        - 54321
+
+glauth_behaviors:
+  ignore_capabilities: true
+
+glauth_api:
+  enabled: true
+  listen:
+    address: "0.0.0.0"
+
+...

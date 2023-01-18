@@ -57,6 +57,46 @@
     dest: /etc/ansible/facts.d/glauth.fact
     mode: 0755
 
+- name: python support
+  when:
+    - glauth_python_packages is defined
+    - glauth_python_packages | length > 0
+  block:
+    - name: create requirements.txt
+      ansible.builtin.template:
+        src: requirements.txt.j2
+        dest: /tmp/glauth-requirements.txt
+        mode: 0660
+
+    - name: ensure python bindings for glauth packages 1st
+      ansible.builtin.pip:
+        requirements: /tmp/glauth-requirements.txt
+        state: present
+        executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+      register: pip_install
+      ignore_errors: true
+      no_log: true
+
+    - name: first run is failed, try with build
+      when:
+        - pip_install.failed
+      block:
+        - name: install build essentials
+          ansible.builtin.package:
+            name: "{{ glauth_build_packages }}"
+            state: present
+
+        - name: ensure python bindings for glauth packages 2nd
+          ansible.builtin.pip:
+            requirements: /tmp/glauth-requirements.txt
+            state: present
+            executable: pip{{ '3' if ansible_python.version.major | int == 3 else '' }}
+
+        - name: uninstall build essentials
+          ansible.builtin.package:
+            name: "{{ glauth_build_packages }}"
+            state: absent
+
 - name: systemd
   when:
     - ansible_service_mgr | lower == "systemd"

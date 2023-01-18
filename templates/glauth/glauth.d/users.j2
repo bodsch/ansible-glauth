@@ -45,6 +45,14 @@
     {% if values.otp_secret | default('') | string | length > 0 %}
   otpsecret     = "{{ values.otp_secret }}"
     {% endif %}
+    {% if values.pass.bcrypt | default('') | string | length > 0 %}
+  bcrypt        = "{{ values.pass.bcrypt }}"
+    {% endif %}
+    {% if values.pass.bcrypt_apps | default([]) | count > 0 %}
+  bcrypt_apps   = [
+    "{{ values.pass.bcrypt_apps | join("\",\n\"") | indent(4) }}"
+  ]
+    {% endif %}
     {% if values.ssh_keys | default([]) | count > 0 %}
   sshkeys       = [
     "{{ values.ssh_keys | join("\",\n\"") | indent(4) }}"

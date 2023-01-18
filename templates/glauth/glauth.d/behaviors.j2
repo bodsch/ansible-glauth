@@ -1,4 +1,5 @@
 
+{# https://glauth.github.io/docs/rate-limiting.html #}
 [behaviors]
   IgnoreCapabilities    = {{ glauth_behaviors.ignore_capabilities | default('false') | bool | ternary('true', 'false') }}
   LimitFailedBinds      = {{ glauth_behaviors.limit_failed_binds | default('false') | bool | ternary('true', 'false') }}

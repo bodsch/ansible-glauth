@@ -31,6 +31,20 @@
     - validate config
     - reload glauth
 
+- name: copy sql scripts
+  ansible.builtin.copy:
+    src: databases
+    dest: "{{ glauth_config_dir }}/"
+    group: "{{ glauth_system_group }}"
+    mode: 0750
+
+- name: create database backends
+  ansible.builtin.include_tasks: backends/sqlite.yml
+  when:
+    - glauth_backends.sqlite is defined
+    - glauth_backends.sqlite.enabled is defined
+    - glauth_backends.sqlite.enabled
+
 - name: restart glauth if needed
   ansible.builtin.meta: flush_handlers
 

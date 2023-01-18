@@ -1,0 +1,13 @@
+---
+- name: converge
+  hosts: instance
+  any_errors_fatal: false
+
+  environment:
+    NETRC: ''
+    # https://github.com/ansible/ansible/issues/77133
+    # https://github.com/ansible/ansible/pull/76542
+    # LANGUAGE: en_UK.utf8
+
+  roles:
+    - role: ansible-glauth
