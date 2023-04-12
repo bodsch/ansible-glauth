@@ -33,7 +33,10 @@
   when:
     - glauth_requirements | default([]) | count > 0
 
-- name: latest release
+- name: get latest release
+  delegate_to: localhost
+  become: false
+  run_once: true
   when:
     - glauth_version == "latest"
   block:
@@ -41,23 +44,16 @@
       delegate_to: localhost
       become: false
       run_once: true
-      ansible.builtin.uri:
-        url: "{{ glauth_release_api_url }}/latest"
-        method: GET
-        return_content: true
-        status_code: 200
-        body_format: json
-        validate_certs: false
+      bodsch.scm.github_latest:
+        project: glauth
+        repository: glauth
         user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
         password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
-      # no_log: "{{ not lookup('env', 'ANSIBLE_DEBUG') | bool }}"
       register: _latest_release
-      until: _latest_release.status == 200
-      retries: 5
 
     - name: re-define glauth_version
       ansible.builtin.set_fact:
-        glauth_version: "{{ _latest_release.json.tag_name[1:] }}"
+        glauth_version: "{{ _latest_release.latest_release }}"
 
 - name: define delegate instance for download handling
   ansible.builtin.set_fact:

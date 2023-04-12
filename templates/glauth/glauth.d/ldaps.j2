@@ -2,7 +2,7 @@
 {% if glauth_config.ldaps is defined %}
 [ldaps]
   {% if glauth_config.ldaps.enabled is defined %}
-  enabled = {{ glauth_config.ldaps.enabled | bool | ternary('true', 'false') }}
+  enabled = {{ glauth_config.ldaps.enabled | bodsch.core.config_bool(true_as='true', false_as='false') }}
   listen  = "{{ glauth_config.ldaps.listen.address | default('0.0.0.0') }}:{{ glauth_config.ldaps.listen.port | default('636') }}"
     {% if glauth_config.ldaps.tls.cert_file is defined and
           glauth_config.ldaps.tls.cert_file | string | length > 0 %}

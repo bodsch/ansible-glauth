@@ -12,7 +12,7 @@ EnvironmentFile     = {{ glauth_defaults_directory }}/glauth
 User                = {{ glauth_system_user }}
 Group               = {{ glauth_system_group }}
 
-ExecReload          = /bin/kill -HUP $MAINPID
+# ExecReload          = /bin/kill -HUP $MAINPID
 ExecStart           = /usr/bin/glauth $OPTIONS
 
 AmbientCapabilities = CAP_NET_BIND_SERVICE

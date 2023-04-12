@@ -1,10 +1,10 @@
 
 watchconfig = true
 {% if glauth_config.debug is defined %}
-debug       = {{ glauth_config.debug | bool | ternary('true', 'false') }}
+debug       = {{ glauth_config.debug | bodsch.core.config_bool(true_as='true', false_as='false') }}
 {% endif %}
 {% if glauth_config.syslog is defined %}
-syslog      = {{ glauth_config.syslog | bool | ternary('true', 'false') }}
+syslog      = {{ glauth_config.syslog | bodsch.core.config_bool(true_as='true', false_as='false') }}
 {% endif %}
 {% if glauth_config.yubikey is defined and
       glauth_config.yubikey.clientid | default('') | string | length > 0 and

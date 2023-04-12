@@ -1,17 +1,7 @@
 ---
 
-# - name: snapd
-#   src: bodsch.snapd
-# #  version: 1.1.2
-#
-# - name: apparmor
-#   src: bodsch.apparmor
-# #  version: 1.0.1
-#
 - name: syslog-ng
   src: bodsch.syslog_ng
-#
-# - name: mariadb
-#   src: bodsch.mariadb
+  version: 1.4.2
 
 ...
