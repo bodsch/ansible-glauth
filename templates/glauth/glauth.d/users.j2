@@ -72,12 +72,12 @@
           values.custom_attrs | count > 0 %}
       {% for key, value in values.custom_attrs.items() %}
   [[users.customattributes]]
-        {% if value | type == "list" %}
+        {% if value | bodsch.core.type == "list" %}
     {{ key }} = [
           {% set _, result_value = value | has_valid_values %}
       {{ result_value | join(",\n") | indent(6) }}
   ]
-        {% elif value | type == "str" %}
+        {% elif value | bodsch.core.type == "str" %}
     {{ key }} = "{{ value }}"
         {% endif %}
       {% endfor %}
