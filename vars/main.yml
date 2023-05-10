@@ -13,6 +13,7 @@ glauth_local_tmp_directory: "{{
 glauth_requirements:
   - iproute2
   - gzip
+  - python3-pip
 
 glauth_python_packages:
   - name: toml

@@ -20,10 +20,10 @@
         - default.yaml
       skip: true
 
-- name: update package cache
-  become: true
-  ansible.builtin.package:
-    update_cache: true
+# - name: update package cache
+#   become: true
+#   ansible.builtin.package:
+#     update_cache: true
 
 - name: install dependency
   become: true
@@ -147,15 +147,6 @@
     owner: "{{ glauth_system_user }}"
     group: "{{ glauth_system_group }}"
     mode: 0755
-
-- name: create ansible facts directory
-  become: true
-  ansible.builtin.file:
-    dest: /etc/ansible/facts.d
-    state: directory
-    owner: root
-    group: root
-    mode: 0775
 
 - name: merge glauth configuration between defaults and custom
   ansible.builtin.set_fact:
