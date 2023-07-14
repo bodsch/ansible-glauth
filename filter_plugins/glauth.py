@@ -41,11 +41,11 @@ class FilterModule(object):
                     for url in assets:
                         urls.append(url.get("browser_download_url"))
 
-        # display.v(f" - {urls}")
+        display.v(f" - {urls}")
 
         # https://github.com/glauth/glauth/releases/download/v2.2.0-RC1/glauth-linux-amd64
         # https://github.com/glauth/glauth/releases/download/v2.1.0/darwinamd64.zip'
-        download_url = [x for x in urls if re.search(r".*{}.*{}.*{}.*".format(version, os, arch), x)][0]
+        download_url = [x for x in urls if re.search(rf".*{version}.*{os}.*{arch}.*", x)][0]
 
         display.v(f"= download_url: {download_url}")
 

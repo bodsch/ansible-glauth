@@ -152,6 +152,12 @@ glauth_defaults_helper:
 
 glauth_defaults_directory: /etc/default
 
+
+glauth_defaults_release:
+  download_url: https://github.com/glauth/glauth/releases
+  api_url: https://api.github.com/repos/glauth/glauth/releases
+  binary: glauth
+
 glauth_plugins: []
 
 go_arch_map:

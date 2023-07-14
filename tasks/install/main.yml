@@ -1,8 +1,39 @@
 ---
 
-- name: detect binary file for glauth
-  delegate_to: "{{ glauth_delegate_to }}"
+- name: user and group handling
+  when:
+    - glauth_system_user != "root"
+  block:
+    - name: create glauth group
+      become: true
+      ansible.builtin.group:
+        name: "{{ glauth_system_group }}"
+        state: present
+        system: true
+
+    - name: create glauth user
+      become: true
+      ansible.builtin.user:
+        name: "{{ glauth_system_user }}"
+        groups: "{{ glauth_system_group }}"
+        append: true
+        shell: /usr/sbin/nologin
+        system: true
+        createhome: false
+        home: /nonexistent
+
+- name: create install directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ glauth_install_path }}"
+    state: directory
+    owner: "{{ glauth_system_user }}"
+    group: "{{ glauth_system_group }}"
+    mode: 0755
+
+- name: detect binary file for glauth on '{{ glauth_delegate_to }}'
   become: false
+  delegate_to: "{{ glauth_delegate_to }}"
   run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
   ansible.builtin.find:
     paths: "{{ glauth_local_tmp_directory }}"
@@ -13,6 +44,76 @@
     recurse: true
   register: _detected_binary
 
+- name: define glauth binary
+  ansible.builtin.set_fact:
+    stat_glauth_binary: "{{ _detected_binary.files[0].path }}"
+  when:
+    - _detected_binary.files is defined
+    - _detected_binary.files | count > 0
+
+- name: fail when extracted binary are missing
+  ansible.builtin.fail:
+    msg: "missing extracted binary on ansible controller"
+  when:
+    - not stat_glauth_binary is defined
+    - not stat_glauth_binary | string | length > 0
+
+- name: detect installed glauth binary
+  ansible.builtin.stat:
+    path: "{{ glauth_install_path }}/{{ glauth_release.binary }}"
+  register: stat_glauth_binary
+
+- name: detect activated glauth binary
+  ansible.builtin.stat:
+    path: "/usr/bin/{{ glauth_release.binary }}"
+  register: stat_glauth_activated
+
+- name: install and activate glauth
+  when:
+    - (stat_glauth_binary is defined and not stat_glauth_binary | string | length > 0) or
+      not stat_glauth_activated.stat | bodsch.core.linked_version(glauth_install_path, glauth_version)
+  block:
+    - name: propagate files
+      block:
+        - name: propagate glauth binaries
+          become: true
+          ansible.builtin.copy:
+            src: "{{ stat_glauth_binary }}"
+            dest: "{{ glauth_install_path }}/glauth"
+            mode: 0755
+            owner: "{{ glauth_system_user }}"
+            group: "{{ glauth_system_group }}"
+            remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
+
+        - name: make files executable
+          become: true
+          ansible.builtin.file:
+            path: "{{ glauth_install_path }}/glauth"
+            mode: 0755
+            owner: "{{ glauth_system_user }}"
+            group: "{{ glauth_system_group }}"
+
+        - name: create link to binary
+          ansible.builtin.file:
+            src: "{{ glauth_install_path }}/{{ glauth_release.binary }}"
+            dest: "/usr/bin/{{ glauth_release.binary }}"
+            state: link
+            force: true
+            follow: false
+          notify:
+            - restart glauth
+
+      rescue:
+        - name: delete install directory
+          ansible.builtin.file:
+            path: "{{ glauth_install_path }}"
+            state: absent
+
+        - name: exit with fail
+          ansible.builtin.fail:
+            msg: A serious error occurred during the installation of the binary.
+
+# plugins
 - name: detect glauth plugins
   delegate_to: "{{ glauth_delegate_to }}"
   become: false
@@ -25,37 +126,59 @@
     recurse: true
   register: _detected_plugins
 
-- name: define plugin list
-  ansible.builtin.set_fact:
-    glauth_plugins: "{{ _detected_plugins.files | glauth_plugins }}"
+- name: install glauth plugins
   when:
     - _detected_plugins.files is defined
     - _detected_plugins.files | count > 0
+  block:
 
-- name: create glauth lib directory
-  become: true
-  ansible.builtin.file:
-    state: directory
-    path: "{{ glauth_data_dir }}"
-    mode: 0755
+    - name: define plugin list
+      ansible.builtin.set_fact:
+        glauth_plugins: "{{ _detected_plugins.files | glauth_plugins }}"
 
-- name: install glauth
-  ansible.builtin.include_tasks: install/glauth.yml
-  when:
-    - _detected_binary.files is defined
-    - _detected_binary.files | count > 0
+    - name: create glauth lib directory
+      become: true
+      ansible.builtin.file:
+        state: directory
+        path: "{{ glauth_data_dir }}"
+        mode: 0755
 
-- name: install plugins
-  ansible.builtin.include_tasks: install/plugins.yml
-  when:
-    - glauth_plugins | count > 0
+    - name: create plugins directory for installed version
+      become: true
+      ansible.builtin.file:
+        state: directory
+        path: "{{ glauth_install_path }}/plugins"
+        mode: 0755
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+
+    - name: copy plugins in place
+      become: true
+      ansible.builtin.copy:
+        src: "{{ glauth_local_tmp_directory }}/{{ item }}"
+        dest: "{{ glauth_install_path }}/plugins/"
+        mode: 0644
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+        remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
+      loop: "{{ glauth_plugins }}"
+      notify:
+        - restart glauth
+
+    - name: create link to plugins
+      become: true
+      ansible.builtin.file:
+        state: link
+        src: "{{ glauth_install_path }}/plugins"
+        dest: "{{ glauth_data_dir }}/plugins"
+        force: true
+        follow: false
 
 - name: create custom fact file
   bodsch.core.facts:
     name: glauth
     facts:
       version: "{{ glauth_version }}"
-
 
 - name: python support
   when:
@@ -74,11 +197,11 @@
       when:
         - not pip_requirements.pip.present
 
-    - name: install docker python packages  # noqa no-handler
+    - name: install glauth python packages  # noqa no-handler
       ansible.builtin.pip:
-        executable: pip3
-        requirements: "{{ pip_requirements.requirements_file }}"
         state: present
+        requirements: "{{ pip_requirements.requirements_file }}"
+        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
       register: pip_install
       ignore_errors: true
       no_log: true
@@ -100,9 +223,9 @@
 
         - name: ensure python bindings for glauth packages 2nd
           ansible.builtin.pip:
-            requirements: "{{ pip_requirements.requirements_file }}"
             state: present
-            executable: pip3
+            requirements: "{{ pip_requirements.requirements_file }}"
+            extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
 
         - name: uninstall build essentials
           ansible.builtin.package:
