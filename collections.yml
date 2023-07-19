@@ -4,4 +4,3 @@ collections:
   - name: bodsch.core
     version: ">=1.0.19"
   - name: bodsch.scm
-    # version: ">=1.0.19"
