@@ -31,6 +31,14 @@
     group: "{{ glauth_system_group }}"
     mode: 0755
 
+- name: create glauth lib directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ glauth_data_dir }}"
+    state: directory
+    group: "{{ glauth_system_group }}"
+    mode: 0755
+
 - name: detect binary file for glauth on '{{ glauth_delegate_to }}'
   become: false
   delegate_to: "{{ glauth_delegate_to }}"
@@ -130,13 +138,6 @@
     - name: define plugin list
       ansible.builtin.set_fact:
         glauth_plugins: "{{ _detected_plugins.files | glauth_plugins }}"
-
-    - name: create glauth lib directory
-      become: true
-      ansible.builtin.file:
-        state: directory
-        path: "{{ glauth_data_dir }}"
-        mode: 0755
 
     - name: create plugins directory for installed version
       become: true
@@ -290,6 +291,5 @@
         owner: root
         group: root
         mode: 0750
-
 
 ...

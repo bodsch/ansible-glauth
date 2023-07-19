@@ -1,6 +1,6 @@
 ---
 
-glauth_version: 2.2.0
+glauth_version: 2.1.0
 
 glauth_system_user: glauth
 glauth_system_group: glauth
