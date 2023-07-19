@@ -58,11 +58,6 @@
     - not stat_glauth_binary is defined
     - not stat_glauth_binary | string | length > 0
 
-- name: detect installed glauth binary
-  ansible.builtin.stat:
-    path: "{{ glauth_install_path }}/{{ glauth_release.binary }}"
-  register: stat_glauth_binary
-
 - name: detect activated glauth binary
   ansible.builtin.stat:
     path: "/usr/bin/{{ glauth_release.binary }}"
@@ -70,7 +65,7 @@
 
 - name: install and activate glauth
   when:
-    - (stat_glauth_binary is defined and not stat_glauth_binary | string | length > 0) or
+    - (stat_glauth_binary is defined and stat_glauth_binary | string | length > 0) or
       not stat_glauth_activated.stat | bodsch.core.linked_version(glauth_install_path, glauth_version)
   block:
     - name: propagate files

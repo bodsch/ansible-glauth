@@ -2,7 +2,7 @@
 
 glauth_main_version: "{{ glauth_version[0:3] }}"
 
-glauth_install_path: /usr/local/bin/glauth/{{ glauth_version }}
+glauth_install_path: /usr/local/opt/glauth/{{ glauth_version }}
 
 glauth_delegate_to: localhost
 

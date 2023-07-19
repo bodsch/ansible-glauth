@@ -10,7 +10,7 @@
 #   ansible.builtin.import_tasks: external_installation.yml
 #
 - name: install
-  ansible.builtin.include_tasks: install/main.yml
+  ansible.builtin.include_tasks: install.yml
 
 - name: configure
   ansible.builtin.include_tasks: configure/main.yml
