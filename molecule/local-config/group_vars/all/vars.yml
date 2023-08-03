@@ -1,6 +1,6 @@
 ---
 
-glauth_version: latest
+# glauth_version: latest
 
 glauth_service:
   listen:

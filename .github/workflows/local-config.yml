@@ -24,7 +24,7 @@ jobs:
         image:
           - debian:11
         ansible-version:
-          - '6.1'
+          - '6.7'
         scenario:
           - local-config
 
