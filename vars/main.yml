@@ -18,6 +18,8 @@ glauth_requirements:
 glauth_python_packages:
   - name: toml
 
+glauth_build_packages: []
+
 # ----------------------------------------------------------------------------------------
 
 glauth_defaults_service:
