@@ -1,0 +1,44 @@
+---
+
+- name: detect the downloaded glauth plugin
+  become: false
+  delegate_to: "{{ glauth_delegate_to }}"
+  run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
+  ansible.builtin.stat:
+    path: "{{ glauth_local_tmp_directory }}/{{ plugin.dest | default(plugin.name ~ '.so') }}"
+  register: stat_glauth_plugin
+
+- name: download
+  when:
+    - stat_glauth_plugin.stat is defined
+    - not stat_glauth_plugin.stat.exists | default('false')
+  block:
+    - name: download glauth plugin {{ plugin.name }}
+      become: false
+      delegate_to: "{{ glauth_delegate_to }}"
+      run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
+      ansible.builtin.get_url:
+        url: "{{ plugin.src }}"
+        dest: "{{ glauth_local_tmp_directory }}/{{ plugin.dest | default(plugin.name ~ '.so') }}"
+        mode: 0640
+      register: _download_plugin
+      until: _download_plugin is succeeded
+      retries: 5
+      delay: 2
+      check_mode: false
+
+  rescue:
+    - name: delete plugin
+      become: false
+      delegate_to: "{{ glauth_delegate_to }}"
+      run_once: "{{ 'false' if glauth_direct_download else 'true' }}"
+      ansible.builtin.file:
+        path: "{{ glauth_local_tmp_directory }}/{{ plugin.dest | default(plugin.name ~ '.so') }}"
+        state: absent
+
+    - name: WARNING
+      ansible.builtin.fail:
+        msg: A serious error occurred when downloading the plugin.
+      ignore_errors: true
+
+...

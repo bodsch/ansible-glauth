@@ -37,5 +37,6 @@
     glauth_groups: "{{ glauth_defaults_groups | combine(glauth_groups, recursive=True) }}"
     glauth_behaviors: "{{ glauth_defaults_behaviors | combine(glauth_behaviors, recursive=True) }}"
     glauth_api: "{{ glauth_defaults_api | combine(glauth_api, recursive=True) }}"
+    glauth_plugins: "{{ glauth_defaults_plugins | combine_lists(glauth_plugins) }}"
 
 ...

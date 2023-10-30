@@ -154,13 +154,21 @@ glauth_defaults_helper:
 
 glauth_defaults_directory: /etc/default
 
-
 glauth_defaults_release:
   download_url: https://github.com/glauth/glauth/releases
   api_url: https://api.github.com/repos/glauth/glauth/releases
   binary: glauth
 
-glauth_plugins: []
+glauth_defaults_plugins:
+  - name: mysql
+    src: https://github.com/glauth/glauth-mysql/releases/download/v{{ glauth_version }}/mysql-linux-{{ system_architecture }}.so
+    dest: mysql.so
+  - name: sqlite
+    src: https://github.com/glauth/glauth-sqlite/releases/download/v{{ glauth_version }}/sqlite-linux-{{ system_architecture }}.so
+    dest: sqlite.so
+  - name: postgres
+    src: https://github.com/glauth/glauth-postgres/releases/download/v{{ glauth_version }}/postgres-linux-{{ system_architecture }}.so
+    dest: postgres.so
 
 go_arch_map:
   x86_64: 'amd64'

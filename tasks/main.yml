@@ -4,11 +4,8 @@
   ansible.builtin.include_tasks: prepare.yml
 
 - name: download
-  ansible.builtin.include_tasks: download.yml
+  ansible.builtin.include_tasks: download/main.yml
 
-# - name: external installation
-#   ansible.builtin.import_tasks: external_installation.yml
-#
 - name: install
   ansible.builtin.include_tasks: install.yml
 

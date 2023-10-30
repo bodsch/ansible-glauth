@@ -8,7 +8,7 @@ if [ -f "./collections.yml" ]
 then
   for collection in $(grep -v "#" collections.yml | grep "^  - name: " | awk -F ': ' '{print $2}')
   do
-    collections_installed="$(ansible-galaxy collection list | grep ${collection} 2> /dev/null)"
+    collections_installed="$(ansible-galaxy collection list | grep "${collection} " 2> /dev/null)"
 
     if [ -z "${collections_installed}" ]
     then

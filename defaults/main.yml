@@ -30,4 +30,6 @@ glauth_behaviors: {}
 
 glauth_api: {}
 
+glauth_plugins: []
+
 ...

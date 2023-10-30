@@ -145,5 +145,18 @@
     - stat_glauth_binary.stat is defined
     - not stat_glauth_binary.stat.exists | default('false')
 
+- name: plugins
+  when:
+    - glauth_version is version_compare('2.2.0', '>=')
+  block:
+    - name: download plugins
+      ansible.builtin.include_tasks: plugins.yml
+      loop: "{{ glauth_plugins }}"
+      loop_control:
+        index_var: index
+        loop_var: plugin
+        label: "plugin: {{ plugin.name }}"
+      when:
+        - plugin is defined
 
 ...

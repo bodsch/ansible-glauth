@@ -1,0 +1,82 @@
+---
+
+glauth_version: 2.2.1
+
+glauth_plugins:
+  - name: mysql
+    src: https://github.com/bodsch/glauth-mysql/releases/download/v{{ glauth_version }}/mysql-linux-{{ system_architecture }}.so
+    dest: mysql.so
+
+glauth_service:
+  listen:
+    ldap: ""
+    ldaps: ""
+  tls:
+    cert_file: "/etc/glauth/certs/molecule.lan.pem"
+    key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_config:
+  ldaps:
+    enabled: false
+    listen:
+      address: "0.0.0.0"
+      port: "636"
+    tls:
+      cert_file: "/etc/glauth/certs/molecule.lan.pem"
+      key_file: "/etc/glauth/certs/molecule.lan.key"
+
+glauth_backends:
+  config:
+    base_dn: "dc=molecule,dc=lan"
+    name_format: "cn"
+    group_format: "ou"
+
+glauth_groups:
+  admins:
+    gid: 3000
+  vpn:
+    gid: 3001
+  users:
+    gid: 6000
+    include_groups:
+      - 3001
+
+glauth_users:
+  admin:
+    enabled: true
+    given_name: Admin
+    sn: ""
+    mail: "admin@matrix.lan"
+    uid: 3000
+    primary_group: 3000
+    other_groups: []
+    pass:
+      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
+      sha256_apps: []
+      bcrypt: ""
+      bcrypt_apps: []
+    ssh_keys: []
+    otp_secret: ""
+    yubikey: ""
+    login_shell: ""
+    home_dir: ""
+    capabilities:
+      "*":
+        object: "dc=molecule,dc=lan"
+    custom_attrs:
+      employeetype:
+        - Intern
+        - Temp
+      employeenumber:
+        - 12345
+        - 54321
+
+glauth_behaviors:
+  ignore_capabilities: true
+
+glauth_api:
+  enabled: true
+  listen:
+    address: "0.0.0.0"
+
+...

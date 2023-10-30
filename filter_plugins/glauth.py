@@ -22,6 +22,7 @@ class FilterModule(object):
             'glauth_plugins': self.plugins,
             'support_tls': self.support_tls,
             'tls_directory': self.tls_directory,
+            'combine_lists': self.combine_lists
         }
 
     def release_version(self, data, artefact, version, os, arch):
@@ -96,7 +97,7 @@ class FilterModule(object):
         enabled = data.get("enabled", False)
 
         cert_file = data.get("tls", {}).get("cert_file", None)
-        key_file  = data.get("tls", {}).get("key_file", None)
+        key_file = data.get("tls", {}).get("key_file", None)
 
         if enabled and cert_file and key_file:
             return True
@@ -111,7 +112,7 @@ class FilterModule(object):
         directory = []
 
         cert_file = data.get("tls", {}).get("cert_file", None)
-        key_file  = data.get("tls", {}).get("key_file", None)
+        key_file = data.get("tls", {}).get("key_file", None)
 
         if cert_file and key_file:
             directory.append(os.path.dirname(cert_file))
@@ -121,3 +122,15 @@ class FilterModule(object):
 
         if len(directory) == 1:
             return directory[0]
+
+    def combine_lists(self, data, second):
+        """
+            This keeps only unique name in the list, not preserving the order though.
+        """
+        display.v(f"combine_lists({data}, {second})")
+
+        result = list({x['name']: x for x in data + second}.values())
+
+        display.v(f"= {result}")
+
+        return result

@@ -1,0 +1,14 @@
+---
+
+roles:
+  - name: snakeoil
+    src: https://github.com/bodsch/ansible-snakeoil
+    scm: git
+    version: 1.4.1
+
+  - name: syslog-ng
+    src: https://github.com/bodsch/ansible-syslog-ng
+    scm: git
+    version: 1.6.0
+
+...
