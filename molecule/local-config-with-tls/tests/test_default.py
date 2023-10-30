@@ -152,6 +152,7 @@ def test_files(host, get_vars):
         f = host.file(_file)
         assert f.is_file
 
+
 def test_certificates(host, get_vars):
     """
     """
@@ -166,6 +167,7 @@ def test_certificates(host, get_vars):
     for _file in files:
         f = host.file(_file)
         assert f.is_file
+
 
 def test_user(host, get_vars):
     """
@@ -189,8 +191,8 @@ def test_service(host):
 def test_open_port(host):
     """
     """
-    service = host.socket(f"tcp://0.0.0.0:389")
+    service = host.socket("tcp://0.0.0.0:389")
     assert service.is_listening
 
-    service = host.socket(f"tcp://0.0.0.0:636")
+    service = host.socket("tcp://0.0.0.0:636")
     assert service.is_listening

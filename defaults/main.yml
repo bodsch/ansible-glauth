@@ -9,6 +9,11 @@ glauth_data_dir: /var/lib/glauth
 
 glauth_direct_download: false
 
+glauth_tls_certificate:
+  source_files:
+    cert: ""
+    key: ""
+
 glauth_release: {}
 
 glauth_service: {}

@@ -116,6 +116,20 @@
           ansible.builtin.fail:
             msg: A serious error occurred during the installation of the binary.
 
+- name: TLS support
+  when:
+    - glauth_config.ldaps | support_tls
+  block:
+    - name: copy certificates
+      become: true
+      glauth_tls_certificates:
+        source:
+          ssl_cert: "{{ glauth_tls_certificate.source_files.cert | default(omit) }}"
+          ssl_key: "{{ glauth_tls_certificate.source_files.key | default(omit) }}"
+        destination: "{{ glauth_config.ldaps | tls_directory }}"
+        owner: "{{ glauth_system_user }}"
+        group: "{{ glauth_system_group }}"
+
 # plugins
 - name: detect glauth plugins
   delegate_to: "{{ glauth_delegate_to }}"

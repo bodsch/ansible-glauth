@@ -19,7 +19,9 @@ class FilterModule(object):
         return {
             'release_version': self.release_version,
             'checksum': self.checksum,
-            'glauth_plugins': self.plugins
+            'glauth_plugins': self.plugins,
+            'support_tls': self.support_tls,
+            'tls_directory': self.tls_directory,
         }
 
     def release_version(self, data, artefact, version, os, arch):
@@ -85,3 +87,37 @@ class FilterModule(object):
                 result.append(basename)
 
         return result
+
+    def support_tls(self, data):
+        """
+        """
+        display.v(f"support_tls({data})")
+
+        enabled = data.get("enabled", False)
+
+        cert_file = data.get("tls", {}).get("cert_file", None)
+        key_file  = data.get("tls", {}).get("key_file", None)
+
+        if enabled and cert_file and key_file:
+            return True
+        else:
+            return False
+
+    def tls_directory(self, data):
+        """
+        """
+        display.v(f"tls_directory({data})")
+
+        directory = []
+
+        cert_file = data.get("tls", {}).get("cert_file", None)
+        key_file  = data.get("tls", {}).get("key_file", None)
+
+        if cert_file and key_file:
+            directory.append(os.path.dirname(cert_file))
+            directory.append(os.path.dirname(key_file))
+
+        directory = list(set(directory))
+
+        if len(directory) == 1:
+            return directory[0]

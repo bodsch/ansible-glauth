@@ -1,5 +1,5 @@
 ---
-name: glauth with local config
+name: glauth with local config and TLS
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
         ansible-version:
           - '6.7'
         scenario:
-          - local-config
+          - local-config-with-tls
 
     steps:
       - name: check out the codebase.
