@@ -12,23 +12,26 @@
         {% set datastore = "plugin" %}
       {% endif %}
 [[backends]]
-  datastore     = "{{ datastore }}"
+  datastore               = "{{ datastore }}"
       {% if datastore == "plugin" %}
-  plugin        = "{{ glauth_data_dir }}/plugins/{{ plugin }}.so"
-  pluginhandler = "NewSQLiteHandler"
-  database      = "{{ glauth_data_dir }}/glauth.db"
+  plugin                  = "{{ glauth_data_dir }}/plugins/{{ plugin }}.so"
+  pluginhandler           = "NewSQLiteHandler"
+  database                = "{{ glauth_data_dir }}/glauth.db"
       {% endif %}
       {% if values.base_dn | default('') | string | length > 0 %}
-  baseDN        = "{{ values.base_dn }}"
+  baseDN                  = "{{ values.base_dn }}"
       {% endif %}
       {% if values.name_format | default('') | string | length > 0 %}
-  nameformat    = "{{ values.name_format }}"
+  nameformat              = "{{ values.name_format }}"
       {% endif %}
       {% if values.group_format | default('') | string | length > 0 %}
-  groupformat   = "{{ values.group_format }}"
+  groupformat             = "{{ values.group_format }}"
       {% endif %}
       {% if values.sshkey_attr | default('') | string | length > 0 %}
-  sshkeyattr    = "{{ values.sshkey_attr }}"
+  sshkeyattr              = "{{ values.sshkey_attr }}"
+      {% endif %}
+      {% if values.anonymous_dse | default('') | string | length > 0 %}
+  anonymousdse            = {{ values.anonymous_dse | bool | bodsch.core.config_bool(true_as='true', false_as='false') }}
       {% endif %}
     {% endif %}
   {% endfor %}

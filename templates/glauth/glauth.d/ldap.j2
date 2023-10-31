@@ -2,7 +2,7 @@
 {% if glauth_config.ldap is defined %}
 [ldap]
   {% if glauth_config.ldap.enabled is defined %}
-  enabled = {{ glauth_config.ldap.enabled | bodsch.core.config_bool(true_as='true', false_as='false') }}
-  listen  = "{{ glauth_config.ldap.listen.address | default('0.0.0.0') }}:{{ glauth_config.ldap.listen.port | default('389') }}"
+  enabled                 = {{ glauth_config.ldap.enabled | bodsch.core.config_bool(true_as='true', false_as='false') }}
+  listen                  = "{{ glauth_config.ldap.listen.address | default('0.0.0.0') }}:{{ glauth_config.ldap.listen.port | default('389') }}"
   {% endif %}
 {% endif %}

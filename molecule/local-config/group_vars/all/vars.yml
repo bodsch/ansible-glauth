@@ -2,15 +2,10 @@
 
 # glauth_version: latest
 
-glauth_service:
-  listen:
-    ldap: ""
-    ldaps: ""
-  tls:
-    cert_file: "/etc/glauth/certs/molecule.lan.pem"
-    key_file: "/etc/glauth/certs/molecule.lan.key"
-
 glauth_config:
+  debug: true
+  syslog: true
+  structured_log: true
   ldaps:
     enabled: false
     listen:
@@ -44,20 +39,18 @@ glauth_users:
     mail: "admin@matrix.lan"
     uid: 3000
     primary_group: 3000
-    other_groups: []
     pass:
-      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
-      sha256_apps: []
-      bcrypt: ""
-      bcrypt_apps: []
-    ssh_keys: []
-    otp_secret: ""
-    yubikey: ""
-    login_shell: ""
-    home_dir: ""
+      #
+      #  # python -c 'import hashlib; print(hashlib.sha256(b"xxx").hexdigest())'
+      #
+      # sha256: "cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860"
+      #
+      # # python -c 'import bcrypt; print(bcrypt.hashpw(b"xxx", bcrypt.gensalt(rounds=15)).decode("ascii"))' | xxd   -p -c 150
+      #
+      bcrypt: "243262243135246974444d364b7534642e6c2e78614c49452e6351692e48663372642e753863796e704c4a4b6b623176674f6c72763453525976362e0a"
     capabilities:
-      "*":
-        object: "dc=molecule,dc=lan"
+      "search":
+        object: "*"
     custom_attrs:
       employeetype:
         - Intern
@@ -69,6 +62,7 @@ glauth_users:
   bodsch:
     given_name: "B."
     sn: "Schulz"
+    enabled: true
     uid: 6000
     primary_group: 6000
     other_groups:

@@ -41,6 +41,7 @@ glauth_defaults_config:
   syslog: false
   watch_config: true
   config_file: ""
+  structured_log: true
 
   yubikey:
     clientid: ""
@@ -66,8 +67,8 @@ glauth_defaults_config:
       cert_file: "certs/server.crt"
       key_file: "certs/server.key"
 
-glauth_defaults_backends: {}
-#   config:
+glauth_defaults_backends:
+  config: {}
 #     base_dn: "dc=glauth,dc=com"
 #     name_format: "cn"
 #     group_format: "ou"

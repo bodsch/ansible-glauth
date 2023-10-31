@@ -22,8 +22,39 @@
 | `capabilities`     | 2.1            | `dict`   | `-`     |             |
 | `custom_attrs`     | 2.1            | `dict`   | `-`     |             |
 
+### Passwords
 
-### create sha256 password
+> Read also the original [security](https://glauth.github.io/docs/security.html) documentation!
+
+#### create bcrypt password
+
+In the configuration file, the password is "coded" in hexadecimal numbers, i.e. each character is replaced by two characters from 0-9 and A-F.
+
+You need [xxd](https://command-not-found.com/xxd) for the following steps:
+
+If you want to insert a bcrypt string into the config, you have to convert your brcrypt password to hexadecimal representation.
+
+```shell
+python -c 'import bcrypt; print(bcrypt.hashpw(b"xxx", bcrypt.gensalt(rounds=15)).decode("ascii"))' | xxd   -p -c 150
+243262243135246974444d364b7534642e6c2e78614c49452e6351692e48663372642e753863796e704c4a4b6b623176674f6c72763453525976362e0a
+```
+The result can then be used in the configuration.
+
+You can check the string in the following way
+```shell
+echo 243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a | xxd -r -p
+$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
+```
+
+A password has the following structure:
+`$2y$2^<number of rounds>$<salt>$<hash>`
+
+e.g: `$2a$12$vXQCX9zGGAj22vNazNrBz.pBCWsUuLH.QBLImlra61i70D/MFDhKa`
+
+For the 2a vs. 2y prefix, see [stackoverflow](https://stackoverflow.com/a/36225192).
+
+
+#### create sha256 password
 
 #### with openssl
 
@@ -35,9 +66,8 @@ echo -n "PASSWORD" | openssl dgst -sha256
 #### with python
 
 ```bash
-pip install bcrypt
-python -c 'import bcrypt; print(bcrypt.hashpw(b"password", bcrypt.gensalt(rounds=10)))'
-b'$2b$10$8GTQxz.fgT3XNj2W7ruhmuXS/YMlakp/ZL5UkbDz1y2uIrbYNSwim'
+python -c 'import hashlib; print(hashlib.sha256(b"xxx").hexdigest())'
+cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860
 ```
 
 ### `capabilities`
@@ -93,36 +123,3 @@ glauth_users:
         object: "dc=molecule,dc=lan"
 ```
 
-### Passwords
-
-#### sha256
-
-A password has the following structure:
-`$2y$2^<number of rounds>$<salt>$<hash>`
-
-e.g: `$2a$12$vXQCX9zGGAj22vNazNrBz.pBCWsUuLH.QBLImlra61i70D/MFDhKa`
-
-#### bcrypt
-
-In the configuration file, the password is "coded" in hexadecimal numbers, i.e. each character is replaced by two characters from 0-9 and A-F.
-
-You need [xxd](https://command-not-found.com/xxd) for the following steps:
-
-If you want to insert a bcrypt string into the config, you have to convert your brcrypt password to hexadecimal representation.
-
-```shell
-python -c 'import bcrypt; print(bcrypt.hashpw(b"clear-text-passwd43", bcrypt.gensalt(rounds=15)).decode("ascii"))'
-$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
-
-echo '$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO' | xxd -p -c 150
-243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a
-```
-The result can then be used in the configuration.
-
-You can check the string in the following way
-```shell
-echo 243262243135246f74394a6c5377303338346a47364454654c4758652e7367347a4b3049724b5a4a64466832575775647355686c367964496338624f0a | xxd -r -p
-$2b$15$ot9JlSw0384jG6DTeLGXe.sg4zK0IrKZJdFh2WWudsUhl6ydIc8bO
-```
-
-For the 2a vs. 2y prefix, see [stackoverflow](https://stackoverflow.com/a/36225192).

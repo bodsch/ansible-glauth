@@ -2,15 +2,14 @@
 {% if glauth_groups is defined %}
   {% for group, values in glauth_groups.items() %}
 [[groups]]
-  name          = "{{ group }}"
+  name                    = "{{ group }}"
     {% if values.gid | default('') | int > 0  %}
-  gidnumber     = {{ values.gid | int }}
+  gidnumber               = {{ values.gid | int }}
     {% endif %}
     {% if values.include_groups | default([]) | count > 0 %}
-  includegroups = [
+  includegroups           = [
     {{ values.include_groups | join(",\n") | indent(4) }}
   ]
-  {# values.include_groups | join(', ') }} ] #}
     {% endif %}
 
   {% endfor %}

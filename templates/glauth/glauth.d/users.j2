@@ -2,69 +2,64 @@
 {% if glauth_users is defined %}
   {% for user, values in glauth_users.items() %}
 [[users]]
-  name          = "{{ user }}"
-    {% if not values.enabled | default('false') | bool  %}
+  name                    = "{{ user }}"
+    {% if not values.enabled | default('false') | bool %}
   disabled = true
     {% endif %}
     {% if values.uid | default('') | int > 0  %}
-  uidnumber     = {{ values.uid | int }}
+  uidnumber               = {{ values.uid | int }}
     {% endif %}
     {% if values.primary_group | default('') | int > 0  %}
-  primarygroup  = {{ values.primary_group | int }}
+  primarygroup            = {{ values.primary_group | int }}
     {% endif %}
     {% if values.other_groups | default([]) | count > 0 %}
-  othergroups     = [
+  othergroups             = [
     {{ values.other_groups | join(",\n") | indent(4) }}
   ]
     {% endif %}
     {% if values.given_name | default('') | string | length > 0 %}
-  givenname     = "{{ values.given_name }}"
+  givenname               = "{{ values.given_name }}"
     {% endif %}
     {% if values.sn | default('') | string | length > 0 %}
-  sn            = "{{ values.sn }}"
+  sn                      = "{{ values.sn }}"
     {% endif %}
     {% if values.mail | default('') | string | length > 0 %}
-  mail          = "{{ values.mail }}"
+  mail                    = "{{ values.mail }}"
     {% endif %}
     {% if values.pass.sha256 | default('') | string | length > 0 %}
-  passsha256    = "{{ values.pass.sha256 }}"
+  passsha256              = "{{ values.pass.sha256 }}"
     {% endif %}
     {% if values.pass.sha256_apps | default([]) | count > 0 %}
-  passappsha256 = [
+  passappsha256           = [
     "{{ values.pass.sha256_apps | join("\",\n\"") | indent(4) }}"
   ]
     {% endif %}
     {% if values.pass.bcrypt | default('') | string | length > 0 %}
-  passbcrypt    = "{{ values.pass.bcrypt }}"
+  passbcrypt              = "{{ values.pass.bcrypt }}"
     {% endif %}
     {% if values.pass.bcrypt_apps | default([]) | count > 0 %}
-  passappbcrypt = [
+  passappbcrypt           = [
     "{{ values.pass.bcrypt_apps | join("\",\n\"") | indent(4) }}"
   ]
     {% endif %}
     {% if values.otp_secret | default('') | string | length > 0 %}
-  otpsecret     = "{{ values.otp_secret }}"
-    {% endif %}
-    {% if values.pass.bcrypt | default('') | string | length > 0 %}
-  bcrypt        = "{{ values.pass.bcrypt }}"
-    {% endif %}
-    {% if values.pass.bcrypt_apps | default([]) | count > 0 %}
-  bcrypt_apps   = [
-    "{{ values.pass.bcrypt_apps | join("\",\n\"") | indent(4) }}"
-  ]
+  otpsecret               = "{{ values.otp_secret }}"
     {% endif %}
     {% if values.ssh_keys | default([]) | count > 0 %}
-  sshkeys       = [
+  sshkeys                 = [
     "{{ values.ssh_keys | join("\",\n\"") | indent(4) }}"
   ]
+    {% endif %}
+    {% if values.pass.yubikey | default('') | string | length > 0 %}
+  yubikey                 = "{{ values.pass.yubikey }}"
     {% endif %}
 
     {% if values.capabilities is defined and
           values.capabilities | count > 0 %}
       {% for cap, obj in values.capabilities.items() %}
   [[users.capabilities]]
-    action = "{{ cap }}"
-    object = "{{ obj.object }}"
+    action                = "{{ cap }}"
+    object                = "{{ obj.object }}"
       {% endfor %}
     {% endif %}
 
@@ -73,12 +68,12 @@
       {% for key, value in values.custom_attrs.items() %}
   [[users.customattributes]]
         {% if value | bodsch.core.type == "list" %}
-    {{ key }} = [
+    {{ key }}             = [
           {% set _, result_value = value | has_valid_values %}
       {{ result_value | join(",\n") | indent(6) }}
   ]
         {% elif value | bodsch.core.type == "str" %}
-    {{ key }} = "{{ value }}"
+    {{ key }}             = "{{ value }}"
         {% endif %}
       {% endfor %}
     {% endif %}

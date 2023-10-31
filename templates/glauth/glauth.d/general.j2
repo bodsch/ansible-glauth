@@ -1,14 +1,24 @@
 
-watchconfig = true
-{% if glauth_config.debug is defined %}
-debug       = {{ glauth_config.debug | bodsch.core.config_bool(true_as='true', false_as='false') }}
+{% if glauth_config.watch_config is defined and
+      glauth_config.watch_config | string | length > 0 %}
+watchconfig               = {{ glauth_config.watch_config | bodsch.core.config_bool(true_as='true', false_as='false') }}
 {% endif %}
-{% if glauth_config.syslog is defined %}
-syslog      = {{ glauth_config.syslog | bodsch.core.config_bool(true_as='true', false_as='false') }}
+{% if glauth_config.debug is defined and
+      glauth_config.debug | string | length > 0 %}
+debug                     = {{ glauth_config.debug | bodsch.core.config_bool(true_as='true', false_as='false') }}
 {% endif %}
+{% if glauth_config.syslog is defined and
+      glauth_config.syslog | string | length > 0 %}
+syslog                    = {{ glauth_config.syslog | bodsch.core.config_bool(true_as='true', false_as='false') }}
+{% endif %}
+{% if glauth_config.structured_log is defined and
+      glauth_config.structured_log | string | length > 0 %}
+structuredlog             = {{ glauth_config.structured_log | bodsch.core.config_bool(true_as='true', false_as='false') }}
+{% endif %}
+
 {% if glauth_config.yubikey is defined and
       glauth_config.yubikey.clientid | default('') | string | length > 0 and
       glauth_config.yubikey.secret | default('') | string | length > 0 %}
-yubikeyclientid = {{ glauth_config.yubikey.clientid  }}
-yubikeysecret   = {{ glauth_config.yubikey.secret }}
+yubikeyclientid           = {{ glauth_config.yubikey.clientid  }}
+yubikeysecret             = {{ glauth_config.yubikey.secret }}
 {% endif %}
