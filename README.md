@@ -6,12 +6,12 @@ Ansible role to install and configure [glauth](https://github.com/glauth/glauth)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-glauth/main.yml?branch=main)][ci]
 [![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-glauth)][issues]
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-glauth)][releases]
-[![Ansible Quality Score](https://img.shields.io/ansible/quality/50067?label=role%20quality)][quality]
+[![Ansible Downloads](https://img.shields.io/ansible/role/d/bodsch/glauth?logo=ansible)][galaxy]
 
 [ci]: https://github.com/bodsch/ansible-glauth/actions
 [issues]: https://github.com/bodsch/ansible-glauth/issues?q=is%3Aopen+is%3Aissue
 [releases]: https://github.com/bodsch/ansible-glauth/releases
-[quality]: https://galaxy.ansible.com/bodsch/glauth
+[galaxy]: https://galaxy.ansible.com/ui/standalone/roles/bodsch/glauth/
 
 If `latest` is set for `glauth_version`, the role tries to install the latest release version.  
 **Please use this with caution, as incompatibilities between releases may occur!**

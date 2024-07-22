@@ -8,21 +8,22 @@ dependency:
 driver:
   name: docker
 
-lint: |
-  set -e
-  yamllint .
-  ansible-lint .
-  flake8 .
-
 platforms:
   - name: database
-    image: "bodsch/ansible-${DISTRIBUTION:-debian:11}"
+    image: "bodsch/ansible-debian:12"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
     privileged: true
     pre_build_image: true
+    cgroupns_mode: host
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    capabilities:
+      - SYS_ADMIN
+    tmpfs:
+      - /run
+      - /tmp
     docker_networks:
       - name: glauth
         ipam_config:
@@ -33,17 +34,24 @@ platforms:
         ipv4_address: "10.13.3.10"
 
   - name: instance
-    image: "bodsch/ansible-${DISTRIBUTION:-debian:11}"
+    image: "bodsch/ansible-${DISTRIBUTION:-debian:12}"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix://run/docker.sock}"
     privileged: true
     pre_build_image: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /var/lib/containerd
+    capabilities:
+      - SYS_ADMIN
+    tmpfs:
+      - /run
+      - /tmp
     published_ports:
       - 389:389
       - 636:636
       - 5555:5555
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     networks:
       - name: glauth
         ipv4_address: "10.13.3.11"
@@ -65,7 +73,6 @@ provisioner:
 
 scenario:
   test_sequence:
-    # - lint
     - destroy
     - dependency
     - syntax
