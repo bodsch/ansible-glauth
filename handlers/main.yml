@@ -12,7 +12,7 @@
     name: glauth
     state: reloaded
 
-- name: validate config  # noqa no-changed-when
+- name: validate glauth config  # noqa no-changed-when
   ansible.builtin.command: |
     glauth --check-config -c {{ glauth_config_dir }}/glauth.conf
   when:

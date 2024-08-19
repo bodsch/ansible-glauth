@@ -19,7 +19,7 @@ env:
 
 jobs:
   debian:
-    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python }}"
+    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }}"
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
@@ -66,7 +66,7 @@ jobs:
             -e DISTRIBUTION="${{ matrix.image }}"
 
   ubuntu:
-    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python }}"
+    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }}"
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'schedule' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
@@ -113,7 +113,7 @@ jobs:
             -e DISTRIBUTION="${{ matrix.image }}"
 
   scenarios:
-    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python }}"
+    name: "${{ matrix.scenario }} / ${{ matrix.image }}, ansible ${{ matrix.ansible-version }}, python ${{ matrix.python_version }}"
     runs-on: ubuntu-22.04
     needs:
       - debian
