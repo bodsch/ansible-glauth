@@ -28,7 +28,7 @@
     group: "{{ glauth_system_group }}"
     mode: 0664
   notify:
-    - validate config
+    - validate glauth config
     - restart glauth
 
 - name: copy sql scripts
