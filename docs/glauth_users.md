@@ -19,7 +19,7 @@
 | `yubikey`          | 2.1            | `string` | `-`     |             |
 | `login_shell`      | 2.1            | `string` | `-`     |             |
 | `home_dir`         | 2.1            | `string` | `-`     |             |
-| `capabilities`     | 2.1            | `dict`   | `-`     |             |
+| `capabilities`     | 2.1            | `dict` or `list`  | `-`     |             |
 | `custom_attrs`     | 2.1            | `dict`   | `-`     |             |
 
 ### Passwords
@@ -89,6 +89,26 @@ cd2eb0837c9b4c962c22d2ff8b5441b7b45805887f051d39bf133b583baf6860
 
 ```yaml
 glauth_users:
+  hackers:
+    enabled: true
+    given_name: Hackers
+    sn: ""
+    mail: "hacker@matrix.lan"
+    capabilities:
+      - object: ou=superheros,dc=molecule,dc=lan
+        action: "search"
+      - object: "ou=someotherdn,dc=molecule,dc=lan"
+        action: "search"
+      - object: "dc=molecule,dc=lan"
+        action: "*"
+    custom_attrs:
+      employeetype:
+        - Intern
+        - Temp
+      employeenumber:
+        - 12345
+        - 54321
+        
   admin:
     enabled: true
     given_name: Admin
@@ -96,11 +116,11 @@ glauth_users:
     uid: 3000
     primary_group: 3000
     pass:
-      sha256: "6b7556f632dc73ea7470a0116d6e55880fda6ca50575b72c7cc5f13df53a2623"
+      bcrypt: "243262243135246974444d364b7534642e6c2e78614c49452e6351692e48663372642e753863796e704c4a4b6b623176674f6c72763453525976362e0a"
     login_shell: "/bin/bash"
     capabilities:
-      "*":
-        object: "dc=molecule,dc=lan"
+      - object: "dc=molecule,dc=lan"
+        action: "*"
 
   bodsch:
     given_name: "B."

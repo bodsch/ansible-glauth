@@ -53,14 +53,27 @@
     {% if values.pass.yubikey | default('') | string | length > 0 %}
   yubikey                 = "{{ values.pass.yubikey }}"
     {% endif %}
-
+    {#
+    # TODO
+    # schould be a list
+    # https://glauth.github.io/docs/capabilities.html
+    #}
     {% if values.capabilities is defined and
           values.capabilities | count > 0 %}
-      {% for cap, obj in values.capabilities.items() %}
+      {% if values.capabilities | bodsch.core.type == "dict" %}
+        {% for cap, obj in values.capabilities.items() %}
   [[users.capabilities]]
     action                = "{{ cap }}"
     object                = "{{ obj.object }}"
-      {% endfor %}
+        {% endfor %}
+      {% endif %}
+      {% if values.capabilities | bodsch.core.type == "list" %}
+        {% for capabilities in values.capabilities %}
+  [[users.capabilities]]
+    action                = "{{ capabilities.get("action", "search") }}"
+    object                = "{{ capabilities.get("object", "*") }}"
+        {% endfor %}
+      {% endif %}
     {% endif %}
 
     {% if values.custom_attrs is defined and
