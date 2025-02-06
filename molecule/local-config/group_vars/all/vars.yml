@@ -86,10 +86,12 @@ glauth_users:
     sn: ""
     mail: "hacker@matrix.lan"
     capabilities:
-      - object: ou=superheros,dc=glauth,dc=com
+      - object: ou=superheros,dc=molecule,dc=lan
         action: "search"
-      - object: "ou=someotherdn,dc=glauth,dc=com"
+      - object: "ou=someotherdn,dc=molecule,dc=lan"
         action: "search"
+      - object: "dc=molecule,dc=lan"
+        action: "*"
 
 glauth_behaviors:
   ignore_capabilities: true

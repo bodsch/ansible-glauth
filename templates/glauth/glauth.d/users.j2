@@ -68,7 +68,11 @@
         {% endfor %}
       {% endif %}
       {% if values.capabilities | bodsch.core.type == "list" %}
-# {{ values.capabilities }}
+        {% for capabilities in values.capabilities %}
+  [[users.capabilities]]
+    action                = "{{ capabilities.get("action", "search") }}"
+    object                = "{{ capabilities.get("object", "*") }}"
+        {% endfor %}
       {% endif %}
     {% endif %}
 

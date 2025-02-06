@@ -132,6 +132,7 @@ jobs:
           - local-config-with-tls
           - latest
           - "2.x"
+          - "2.3.2"
 
     steps:
       - name: check out the codebase.
