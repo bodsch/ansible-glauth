@@ -4,13 +4,23 @@ name: push to ansible galaxy
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - "CI"
-    branches:
-      - main
-    types:
-      - completed
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+  # workflow_run:
+  #   workflows:
+  #     - "CI"
+  #   branches:
+  #     - main
+  #   types:
+  #     - completed
 
 jobs:
   galaxy:
@@ -24,6 +34,6 @@ jobs:
           path: 'ansible-glauth'
 
       - name: 'Release on galaxy'
-        uses: ansible-actions/ansible-galaxy-action@v1.1.1
+        uses: ansible-actions/ansible-galaxy-action@v1.2.0
         with:
           galaxy_api_key: ${{ secrets.galaxy_api_key }}
