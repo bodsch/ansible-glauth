@@ -2,6 +2,8 @@
 
 galaxy_info:
   role_name: glauth
+  namespace: bodsch
+
   author: Bodo Schulz
   description: ansible role to setup glauth
   license: Apache
