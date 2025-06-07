@@ -21,6 +21,11 @@
     - name: re-define glauth_version
       ansible.builtin.set_fact:
         glauth_version: "{{ _latest_release.latest_release }}"
+        glauth_plugins: []
+
+- name: merge glauth configuration between defaults and custom
+  ansible.builtin.set_fact:
+    glauth_plugins: "{{ glauth_defaults_plugins | combine_lists(glauth_plugins) }}"
 
 - name: define download information
   ansible.builtin.set_fact:

@@ -1,6 +1,7 @@
 ---
 
 collections:
-  - name: bodsch.core
-    version: ">=1.1.0"
-  - name: bodsch.scm
+ - name: bodsch.core
+   version: ">=2.6.0"
+ - name: bodsch.scm
+   version: ">=1.4.1"

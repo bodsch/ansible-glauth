@@ -24,7 +24,11 @@ on:
     paths:
       - "!Makefile"
       - "!README.md"
-      - "tasks/**"
+      - '!tasks/**'
+      - '!.github/workflows/*.yml'
+      - 'filter_plugins/**'
+      - 'library/**'
+      - '.config/pycodestyle.cfg'
   pull_request:
     branches:
       - 'main'
@@ -33,26 +37,42 @@ on:
     paths:
       - "!Makefile"
       - "!README.md"
-      - "tasks/**"
+      - '!tasks/**'
+      - '!.github/workflows/*.yml'
+      - 'filter_plugins/**'
+      - 'library/**'
+      - '.config/pycodestyle.cfg'
 
 jobs:
-  lint:
-    name: linting
+  pycodestyle:
     runs-on: ubuntu-latest
-    steps:
-      - name: 🛎 Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
 
-      - name: lint
-        uses: docker://ghcr.io/github/super-linter:slim-v4
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GH_REGISTRY_TOKEN }}
-          VALIDATE_ALL_CODEBASE: true
-          VALIDATE_ANSIBLE: true
-          # VALIDATE_MARKDOWN: true
-          VALIDATE_YAML: true
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: 🐍 set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python_version }}"
+
+      - name: Install test dependencies.
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pycodestyle
+
+      - name: Lint code.
+        run: |
+          pycodestyle $PWD --config=.config/pycodestyle.cfg --statistics --count --exclude=test_*.py --exclude=.git,.github,molecule,hooks
 
 ...
