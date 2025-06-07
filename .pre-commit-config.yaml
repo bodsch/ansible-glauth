@@ -1,0 +1,18 @@
+---
+repos:
+  - repo: local
+    hooks:
+      - id: flake8-local
+        name: flake8 (lokal)
+        entry: bash -c 'flake8 --append-config=.config/pycodestyle.cfg'
+        language: system
+        types: [python]
+        # exclude: |
+        #   ^(\.git|\.venv|env|venv|build|dist|__pycache__)/
+        # args: [--max-line-length=150]
+
+      - id: pycodestyle-custom
+        name: pycodestyle (custom)
+        entry: bash -c 'pycodestyle $PWD --config=.config/pycodestyle.cfg --statistics --count'
+        language: system
+        types: [python]
