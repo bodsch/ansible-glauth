@@ -33,16 +33,26 @@ provisioner:
   name: ansible
   ansible_args:
     - --diff
-    - -v
+    - -vvvv
   config_options:
     defaults:
       deprecation_warnings: true
-      callback_result_format: yaml
+      # callback_result_format: yaml
       callbacks_enabled: profile_tasks
+      stdout_callback: community.general.diy
       gathering: smart
       fact_caching: jsonfile
       fact_caching_timeout: 8640
       fact_caching_connection: ansible_facts
+    callback_diy:
+      msg_ok: "
+        OK: {{ ansible_callback_diy.task.name }} auf {{ ansible_callback_diy.result._host }}
+        Ergebnis:
+          {{ ansible_callback_diy.result | to_nice_yaml }}"
+      # msg_ok: ""
+      msg_skipped: ""
+      msg_unreachable: "Host {{ ansible_callback_diy.result._host }} nicht erreichbar"
+      msg_failed: "Fehler bei Task {{ ansible_callback_diy.task.name }}"
 
 scenario:
   test_sequence:
