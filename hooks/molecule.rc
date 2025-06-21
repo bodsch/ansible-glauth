@@ -8,67 +8,44 @@ fi
 
 TOX_OPTS="-e ${TOX_ANSIBLE}"
 
-vercomp() {
+exit_hook() {
+  rc=$?
 
-  [[ $1 == $2 ]] && return 0
-  v1=$(echo "$1" | sed -e 's|-|.|g')
-  v2=$(echo "$2" | sed -e 's|-|.|g')
+  echo "trap signal $rc"
 
-  local IFS=.
-  local i ver1=($1) ver2=($2)
-  # fill empty fields in ver1 with zeros
-  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-  do
-    ver1[i]=0
-  done
+  [ -e "${HOME}/.ansible/roles/${namespace}.${name}" ] && rm --force "${HOME}/.ansible/roles/${namespace}.${name}"
+  [ -e "${HOME}/.ansible/roles/${role_base_name}" ] && rm --force "${HOME}/.ansible/roles/${role_base_name}"
 
-  for ((i=0; i<${#ver1[@]}; i++))
-  do
-    if [[ -z ${ver2[i]} ]]
-    then
-      # fill empty fields in ver2 with zeros
-      ver2[i]=0
-    fi
-    if ((10#${ver1[i]} > 10#${ver2[i]}))
-    then
-      return 1
-    fi
-    if ((10#${ver1[i]} < 10#${ver2[i]}))
-    then
-      return 2
-    fi
-  done
-  return 0
+  exit $rc;
 }
 
-install_collection() {
-  local collection="${1}"
+# trap --list
+trap exit_hook EXIT SIGHUP SIGINT SIGTERM
 
-  echo "Install the required collection '${collection}'"
-  ansible-galaxy collection install ${collection}
-}
+mkdir -p ${HOME}/.ansible/roles
 
-remove_collection() {
+role_base_name=$(basename $(pwd))
 
-  local collection="${1}"
+ln -sfn "$(pwd)" "${HOME}/.ansible/roles/${role_base_name}"
 
-  namespace="$(echo "${collection}" | cut -d '.' -f1)"
-  name="$(echo "${collection}" | cut -d '.' -f2)"
+if [ -f meta/main.yml ]
+then
+  name=$(grep ".*role_name:" meta/main.yml | awk "{ print \$2 }")
+  namespace=$(grep ".*namespace:" meta/main.yml | awk "{ print \$2 }")
 
-  collection="${HOME}/.ansible/collections/ansible_collections/${namespace}/${name}"
+  echo ""
+  echo "ansible role: ${namespace}.${name}"
 
-  rm \
-    --recursive \
-    --force \
-    "${collection}"
-}
+  ln -sfn "$(pwd)" "${HOME}/.ansible/roles/${namespace}.${name}"
+fi
 
-publish() {
+current_dir=$(pwd)
 
-  TOKEN="${HOME}/.ansible/galaxy_token"
+TOX_TEST="${1}"
 
-  if [ -e "${TOKEN}" ]
-  then
-    ansible-galaxy import --token=$(cat "${TOKEN}") bodsch # "???"
-  fi
-}
+if [ -f "./collections.yml" ]
+then
+  echo ""
+  ${current_dir}/hooks/manage_collections.py --scenario ${TOX_SCENARIO:-default}
+  echo ""
+fi
