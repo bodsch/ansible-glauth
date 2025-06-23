@@ -38,15 +38,20 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "${{ matrix.python_version }}"
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-dateutil
 
       - name: install dependencies
         run: |
@@ -84,15 +89,20 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "${{ matrix.python_version }}"
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-dateutil
 
       - name: install dependencies
         run: |
@@ -136,15 +146,20 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "${{ matrix.python_version }}"
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-dateutil
 
       - name: install dependencies
         run: |
