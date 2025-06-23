@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4.2.2.2.2
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
 
@@ -88,12 +88,12 @@ jobs:
 
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v4.2.2.2.2
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5.6.0.6.0
+        uses: actions/setup-python@v5.6.0
         with:
           python-version: "${{ matrix.python_version }}"
 
