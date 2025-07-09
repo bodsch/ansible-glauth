@@ -57,6 +57,6 @@
 
   roles:
     - role: bodsch.core.syslog_ng
-    - role: bodsch.core.snakeoil
+    - role: bodsch.certs.snakeoil
 
 ...
