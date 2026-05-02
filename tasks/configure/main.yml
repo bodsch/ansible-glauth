@@ -7,7 +7,7 @@
     state: directory
     owner: root
     group: "{{ glauth_system_group }}"
-    mode: 0775
+    mode: "0775"
 
 - name: create certificate directory
   become: true
@@ -16,7 +16,7 @@
     state: directory
     owner: "{{ glauth_system_user }}"
     group: "{{ glauth_system_group }}"
-    mode: 0770
+    mode: "0770"
 
 - name: create glauth.conf
   become: true
@@ -26,7 +26,7 @@
     force: true
     owner: root
     group: "{{ glauth_system_group }}"
-    mode: 0664
+    mode: "0664"
   notify:
     - validate glauth config
     - restart glauth
@@ -36,7 +36,7 @@
     src: databases
     dest: "{{ glauth_config_dir }}/"
     group: "{{ glauth_system_group }}"
-    mode: 0750
+    mode: "0750"
 
 - name: create database backends
   ansible.builtin.include_tasks: backends/sqlite.yml

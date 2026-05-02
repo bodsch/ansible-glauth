@@ -18,45 +18,28 @@ class FilterModule(object):
     def filters(self):
         return {
             'release_version': self.release_version,
-            'checksum': self.checksum,
+            # 'checksum': self.checksum,
             'glauth_plugins': self.plugins,
             'support_tls': self.support_tls,
             'tls_directory': self.tls_directory,
             'combine_lists': self.combine_lists
         }
 
-    def release_version(self, data, artefact, version, os, arch):
+    def release_version(self, data, version):
         """
         """
-        # display.v(f"release_version(self, data, {artefact}, {version}, {os}, {arch})")
-        download_url = None
-        urls = []
-        # display.v(f"  {type(data)}")
-        if isinstance(data, list):
-            """
-            """
-            for d in data:
-                """
-                """
-                assets = d.get("assets", [])
+        display.v(f"glauth::release_version(data: {data}, aversion: {version})")
 
-                if assets and len(assets) > 0:
-                    for url in assets:
-                        urls.append(url.get("browser_download_url"))
+        _VERSION_PATTERN = re.compile(r".*\/download\/(?P<version>.*)\/.*")
 
-        display.v(f" - {urls}")
-
-        # https://github.com/glauth/glauth/releases/download/v2.2.0-RC1/glauth-linux-amd64
-        # https://github.com/glauth/glauth/releases/download/v2.1.0/darwinamd64.zip'
-        download_url = [x for x in urls if re.search(rf".*{version}.*{os}.*{arch}.*", x)][0]
-
-        display.v(f"= download_url: {download_url}")
-
-        return download_url
+        match = _VERSION_PATTERN.search(data)
+        return match.group(1) if match else None
 
     def checksum(self, data, artefact, os, arch):
         """
         """
+        display.v(f"glauth::checksum(data: {data}, artefact: {artefact}, os: {os}, arch: {arch})")
+
         checksum = None
 
         if isinstance(data, list):
@@ -75,7 +58,7 @@ class FilterModule(object):
     def plugins(self, data):
         """
         """
-        # display.v("plugins(self, data")
+        display.v(f"glauth::plugins(data: {data})")
 
         result = []
 
@@ -92,7 +75,7 @@ class FilterModule(object):
     def support_tls(self, data):
         """
         """
-        display.v(f"support_tls({data})")
+        display.v(f"glauth::support_tls(data: {data})")
 
         enabled = data.get("enabled", False)
 
@@ -107,7 +90,7 @@ class FilterModule(object):
     def tls_directory(self, data):
         """
         """
-        display.v(f"tls_directory({data})")
+        display.v(f"glauth::tls_directory(data: {data})")
 
         directory = []
 
@@ -123,13 +106,19 @@ class FilterModule(object):
         if len(directory) == 1:
             return directory[0]
 
-    def combine_lists(self, data, second):
+    def combine_lists(self, data, configured, release_version):
         """
             This keeps only unique name in the list, not preserving the order though.
         """
-        display.v(f"combine_lists({data}, {second})")
+        display.v(f"glauth::combine_lists(data: {data}, configured: {configured}, release_version: {release_version})")
 
-        result = list({x['name']: x for x in data + second}.values())
+        result = list({x['name']: x for x in data + configured}.values())
+
+        if release_version:
+            result = [
+                {**p, "src": re.sub(r'v\d+\.\d+\.\d+', release_version, p["src"])}
+                for p in result
+            ]
 
         display.v(f"= {result}")
 

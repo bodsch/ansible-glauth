@@ -39,7 +39,6 @@ provisioner:
       deprecation_warnings: true
       callback_result_format: yaml
       callbacks_enabled: profile_tasks
-      # stdout_callback: yaml
       gathering: smart
       fact_caching_timeout: 320
 

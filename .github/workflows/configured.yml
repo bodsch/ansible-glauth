@@ -38,13 +38,13 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: "${{ matrix.python_version }}"
 
@@ -89,13 +89,13 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: "${{ matrix.python_version }}"
 
@@ -146,13 +146,13 @@ jobs:
 
     steps:
       - name: check out the codebase.
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
         with:
           path: 'ansible-glauth'
           ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: 🐍 set up python
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v6.2.0
         with:
           python-version: "${{ matrix.python_version }}"
 

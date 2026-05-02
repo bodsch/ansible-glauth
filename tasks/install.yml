@@ -29,7 +29,7 @@
     state: directory
     owner: "{{ glauth_system_user }}"
     group: "{{ glauth_system_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: create glauth lib directory
   become: true
@@ -37,7 +37,7 @@
     path: "{{ glauth_data_dir }}"
     state: directory
     group: "{{ glauth_system_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: detect binary file for glauth on '{{ glauth_delegate_to }}'
   become: false
@@ -83,7 +83,7 @@
           ansible.builtin.copy:
             src: "{{ stat_glauth_binary }}"
             dest: "{{ glauth_install_path }}/glauth"
-            mode: 0755
+            mode: "0755"
             owner: "{{ glauth_system_user }}"
             group: "{{ glauth_system_group }}"
             remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
@@ -92,7 +92,7 @@
           become: true
           ansible.builtin.file:
             path: "{{ glauth_install_path }}/glauth"
-            mode: 0755
+            mode: "0755"
             owner: "{{ glauth_system_user }}"
             group: "{{ glauth_system_group }}"
 
@@ -158,7 +158,7 @@
       ansible.builtin.file:
         state: directory
         path: "{{ glauth_install_path }}/plugins"
-        mode: 0755
+        mode: "0755"
         owner: "{{ glauth_system_user }}"
         group: "{{ glauth_system_group }}"
 
@@ -167,7 +167,7 @@
       ansible.builtin.copy:
         src: "{{ glauth_local_tmp_directory }}/{{ item }}"
         dest: "{{ glauth_install_path }}/plugins/"
-        mode: 0644
+        mode: "0644"
         owner: "{{ glauth_system_user }}"
         group: "{{ glauth_system_group }}"
         remote_src: "{{ 'true' if glauth_direct_download else 'false' }}"
@@ -211,7 +211,7 @@
       ansible.builtin.pip:
         state: present
         requirements: "{{ pip_requirements.requirements_file }}"
-        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
+        extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_facts.python.version) | default(omit) }}"
       register: pip_install
       ignore_errors: true
       no_log: true
@@ -235,7 +235,7 @@
           ansible.builtin.pip:
             state: present
             requirements: "{{ pip_requirements.requirements_file }}"
-            extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_python.version) | default(omit) }}"
+            extra_args: "{{ glauth_python_extra_args | default([]) | bodsch.core.python_extra_args(python_version=ansible_facts.python.version) | default(omit) }}"
 
         - name: uninstall build essentials
           ansible.builtin.package:
@@ -257,7 +257,7 @@
 
 - name: systemd
   when:
-    - ansible_service_mgr | lower == "systemd"
+    - ansible_facts.service_mgr | lower == "systemd"
   block:
     - name: create systemd service unit
       become: true
@@ -266,7 +266,7 @@
         dest: "{{ systemd_lib_directory }}/glauth.service"
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
       notify:
         - daemon-reload
         - restart glauth
@@ -279,14 +279,14 @@
         force: true
         owner: root
         group: "{{ glauth_system_group }}"
-        mode: 0640
+        mode: "0640"
       notify:
         - validate glauth config
         - restart glauth
 
 - name: openrc
   when:
-    - ansible_service_mgr | lower == "openrc"
+    - ansible_facts.service_mgr | lower == "openrc"
   block:
     - name: create openrc service configuration
       become: true
@@ -295,7 +295,7 @@
         dest: "/etc/conf.d/glauth"
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
 
     - name: create openrc init configuration
       become: true
@@ -304,6 +304,6 @@
         dest: "/etc/init.d/glauth"
         owner: root
         group: root
-        mode: 0750
+        mode: "0750"
 
 ...

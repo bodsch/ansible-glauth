@@ -28,7 +28,7 @@
 
 - name: define delegate instance for download handling
   ansible.builtin.set_fact:
-    glauth_delegate_to: "{{ ansible_host }}"
+    glauth_delegate_to: "{{ ansible_facts.host }}"
     glauth_local_tmp_directory: "{{
         lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
         default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
@@ -43,7 +43,7 @@
     project: glauth
     repository: glauth
     version: "{{ glauth_version }}"
-    architecture: "{{ ansible_architecture }}"
+    architecture: "{{ ansible_facts.architecture }}"
     system: "{{ ansible_facts.system }}"
     user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
     password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
@@ -72,7 +72,7 @@
   ansible.builtin.file:
     path: "{{ glauth_local_tmp_directory }}"
     state: directory
-    mode: 0750
+    mode: "0750"
 
 - name: detect the downloaded glauth archive
   become: false
@@ -94,7 +94,7 @@
       ansible.builtin.get_url:
         url: "{{ glauth_download_url }}"
         dest: "{{ glauth_download_artefact }}"
-        mode: 0640
+        mode: "0640"
       register: _download_archive
       until: _download_archive is succeeded
       retries: 5

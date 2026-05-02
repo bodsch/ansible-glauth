@@ -8,6 +8,24 @@
     path: "{{ glauth_local_tmp_directory }}/{{ plugin.dest | default(plugin.name ~ '.so') }}"
   register: stat_glauth_plugin
 
+
+# - name: get download link for release {{ glauth_version }}
+#   delegate_to: localhost
+#   become: false
+#   run_once: true
+#   bodsch.scm.github_releases:
+#     project: glauth
+#     repository: glauth
+#     version: "{{ glauth_version }}"
+#     architecture: "{{ ansible_facts.architecture }}"
+#     system: "{{ ansible_facts.system }}"
+#     user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
+#     password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
+#   register: _glauth_releases
+#   until: _glauth_releases.status == 200
+#   retries: 2
+
+
 - name: download
   when:
     - stat_glauth_plugin.stat is defined
@@ -20,7 +38,7 @@
       ansible.builtin.get_url:
         url: "{{ plugin.src }}"
         dest: "{{ glauth_local_tmp_directory }}/{{ plugin.dest | default(plugin.name ~ '.so') }}"
-        mode: 0640
+        mode: "0640"
       register: _download_plugin
       until: _download_plugin is succeeded
       retries: 5

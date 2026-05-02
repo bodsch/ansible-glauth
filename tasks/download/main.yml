@@ -23,17 +23,13 @@
         glauth_version: "{{ _latest_release.latest_release }}"
         glauth_plugins: []
 
-- name: merge glauth configuration between defaults and custom
-  ansible.builtin.set_fact:
-    glauth_plugins: "{{ glauth_defaults_plugins | combine_lists(glauth_plugins) }}"
-
 - name: define download information
   ansible.builtin.set_fact:
     glauth_release: "{{ glauth_defaults_release | combine(glauth_release, recursive=True) }}"
 
 - name: define delegate instance for download handling
   ansible.builtin.set_fact:
-    glauth_delegate_to: "{{ ansible_host }}"
+    glauth_delegate_to: "{{ ansible_facts.host }}"
     glauth_local_tmp_directory: "{{
         lookup('env', 'CUSTOM_LOCAL_TMP_DIRECTORY') |
         default('/var/cache/ansible/glauth', true) }}/{{ glauth_version }}"
@@ -48,7 +44,7 @@
     project: glauth
     repository: glauth
     version: "{{ glauth_version }}"
-    architecture: "{{ ansible_architecture }}"
+    architecture: "{{ ansible_facts.architecture }}"
     system: "{{ ansible_facts.system }}"
     user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
     password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
@@ -62,6 +58,7 @@
   run_once: true
   ansible.builtin.set_fact:
     glauth_download_url: "{{ _glauth_releases.download_url }}"
+    glauth_release_version: "{{ _glauth_releases.download_url | release_version(version=glauth_version) }}"
 
 - name: define download artefact
   delegate_to: localhost
@@ -77,7 +74,7 @@
   ansible.builtin.file:
     path: "{{ glauth_local_tmp_directory }}"
     state: directory
-    mode: 0750
+    mode: "0750"
 
 - name: detect the downloaded glauth archive
   become: false
@@ -99,7 +96,7 @@
       ansible.builtin.get_url:
         url: "{{ glauth_download_url }}"
         dest: "{{ glauth_download_artefact }}"
-        mode: 0640
+        mode: "0640"
       register: _download_archive
       until: _download_archive is succeeded
       retries: 5
@@ -149,6 +146,10 @@
     - stat_glauth_downloaded_artefact.stat.mimetype == "application/zip"
     - stat_glauth_binary.stat is defined
     - not stat_glauth_binary.stat.exists | default('false')
+
+- name: merge glauth configuration between defaults and custom
+  ansible.builtin.set_fact:
+    glauth_plugins: "{{ glauth_defaults_plugins | combine_lists(glauth_plugins, glauth_release_version) }}"
 
 - name: plugins
   when:
