@@ -11,7 +11,7 @@ glauth_local_tmp_directory: "{{
   default(lookup('env', 'HOME') ~ '/.cache/ansible/glauth', true) }}/{{ glauth_version }}"
 
 glauth_requirements:
-  - iproute2
+  # - iproute2
   - gzip
   - python3-pip
 

@@ -40,6 +40,12 @@
       ansible.builtin.package:
         update_cache: true
 
+    - name: install dependencies
+      ansible.builtin.package:
+        name:
+          - iproute2
+        state: present
+
     - name: environment
       ansible.builtin.debug:
         msg:

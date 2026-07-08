@@ -1,6 +1,6 @@
 ---
 
-glauth_version: 2.3.2
+# glauth_version: latest
 
 glauth_tls_certificate:
   source_files:

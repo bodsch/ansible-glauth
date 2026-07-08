@@ -18,6 +18,8 @@ class GlAuthBackends(object):
         """
         self.module = module
 
+        self.module.log("GlAuthBackends::__init__()")
+
         self.state = module.params.get("state")
         self.database_type = module.params.get("database_type")
 
@@ -25,6 +27,8 @@ class GlAuthBackends(object):
         """
           runner
         """
+        self.module.log("GlAuthBackends::run()")
+
         result = dict(
             rc=0,
             failed=False,
@@ -36,8 +40,10 @@ class GlAuthBackends(object):
         glauth_backends = toml_data.get('backends')
 
         for backend in glauth_backends:
-            if backend.get("datastore") == "plugin" and self.database_type in backend.get("plugin",
-                                                                                          None):
+            _backend_datastore = backend.get("datastore")
+            _backend_plugin = backend.get("plugin", None)
+
+            if _backend_datastore == "plugin" and self.database_type in _backend_plugin:
                 break
 
         if self.database_type == "sqlite":
@@ -48,6 +54,8 @@ class GlAuthBackends(object):
     def _sqlite(self, config):
         """
         """
+        self.module.log(f"GlAuthBackends::_sqlite(config: {config})")
+
         import sqlite3
 
         database_file = config.get("database")
@@ -134,7 +142,6 @@ class GlAuthBackends(object):
             # )
 
             return dict(
-                rc=0,
                 failed=_failed,
                 changed=_changed,
                 msg=_msg

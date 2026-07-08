@@ -23,6 +23,8 @@ class GlAuthBackendData(object):
         """
         self.module = module
 
+        self.module.log("GlAuthBackendData::__init__()")
+
         self.database_type = module.params.get("database_type")
         self.groups = module.params.get("groups")
         self.users = module.params.get("users")
@@ -33,6 +35,8 @@ class GlAuthBackendData(object):
         """
           runner
         """
+        self.module.log("GlAuthBackendData::run()")
+
         result = dict(
             rc=0,
             failed=False,
@@ -58,6 +62,8 @@ class GlAuthBackendData(object):
     def _sqlite(self, config):
         """
         """
+        self.module.log(f"GlAuthBackendData::_sqlite(config: {config})")
+
         import sqlite3
 
         self.database_file = config.get("database")
@@ -127,8 +133,8 @@ class GlAuthBackendData(object):
             if conn:
                 conn.close()
 
-        self.module.log(msg=f" - '{result_state}'")
-        self.module.log(msg=f" - '{_failed}' {_msg}")
+        self.module.log(msg=f" - result_state: '{result_state}'")
+        self.module.log(msg=f" - failed: '{_failed}' msg: {_msg}")
 
         # define changed for the running tasks
         # migrate a list of dict into dict
@@ -139,8 +145,8 @@ class GlAuthBackendData(object):
         # find all failed and define our variable
         failed = (len({k: v for k, v in combined_d.items() if v.get('failed')}) > 0)
 
-        # self.module.log(msg=f" - changed '{changed}'")
-        # self.module.log(msg=f" - failed  '{failed}'")
+        self.module.log(msg=f" - changed '{changed}'")
+        self.module.log(msg=f" - failed  '{failed}'")
 
         result_msg = {k: v.get('state') for k, v in combined_d.items()}
 
@@ -159,6 +165,8 @@ class GlAuthBackendData(object):
               gidnumber INTEGER NOT NULL
             );
         """
+        self.module.log("GlAuthBackendData::import_groups()")
+
         for group, values in self.groups.items():
             """
                 name        LDAP group name (i.e. cn or ou depending on context)
@@ -230,7 +238,8 @@ class GlAuthBackendData(object):
           );
 
         """
-        # self.module.log(msg=f"users: {self.users}'")
+        self.module.log("GlAuthBackendData::_import_users()")
+
         result_state = []
 
         for user, values in self.users.items():
@@ -305,6 +314,8 @@ class GlAuthBackendData(object):
         """
           https://docs.python.org/3/library/crypt.html
         """
+        self.module.log(f"GlAuthBackendData::__password_hash(plaintext: {plaintext})")
+
         import crypt
 
         try:
@@ -324,6 +335,8 @@ class GlAuthBackendData(object):
     def __checksum(self, plaintext):
         """
         """
+        self.module.log(f"GlAuthBackendData::__checksum(plaintext: {plaintext})")
+
         import hashlib
 
         _bytes = plaintext.encode('utf-8')
@@ -333,6 +346,8 @@ class GlAuthBackendData(object):
     def __check_database_value(self, table, where, value):
         """
         """
+        self.module.log(f"GlAuthBackendData::__check_database_value(table: {table}, where: {where}, value: {value})")
+
         import sqlite3
 
         try:
@@ -396,6 +411,8 @@ class GlAuthBackendData(object):
           capabilities  - used to retrieve capabilities granted to users linked to it from the users table
           custom_attrs  - A JSON-encoded string, containing arbitrary additional attributes; must be {} by default
         """
+        self.module.log(f"GlAuthBackendData::__insert_user(user: {user}, values: {values})")
+
         given_name = values.get("given_name", None)
         sn = values.get("sn", '')
         mail = values.get("mail", '')
@@ -454,6 +471,8 @@ class GlAuthBackendData(object):
     def __update_user(self, user, values):
         """
         """
+        self.module.log(f"GlAuthBackendData::__update_user(user: {user}, values: {values})")
+
         given_name = values.get("given_name", None)
         sn = values.get("sn", '')
         mail = values.get("mail", '')
@@ -513,6 +532,8 @@ class GlAuthBackendData(object):
     def __update_user_single_field(self, uid, field, value):
         """
         """
+        self.module.log(f"GlAuthBackendData::__update_user_single_field(uid: {uid}, field: {field}, value: {value})")
+
         query = f"update users set {field} = '{value}' where uidnumber = '{uid}'"
 
         result, last_inserted_id, msg = self.__execute_query(query)
@@ -529,6 +550,8 @@ class GlAuthBackendData(object):
             INSERT INTO capabilities(userid, action, object) VALUES(5001, "search", "ou=superheros,dc=glauth,dc=com");
             INSERT INTO capabilities(userid, action, object) VALUES(5003, "search", "*");
         """
+        self.module.log(f"GlAuthBackendData::__update_user_capabilities(uid: {uid}, capabilities: {capabilities})")
+
         for action, obj in capabilities.items():
             """
                 userid  internal user id number, used by glauth
@@ -592,6 +615,8 @@ class GlAuthBackendData(object):
     def __group_id(self, gid):
         """
         """
+        self.module.log(f"GlAuthBackendData::__group_id(gid: {gid})")
+
         _id = None
 
         state, data = self.__group_data()
@@ -611,6 +636,8 @@ class GlAuthBackendData(object):
         """
           return a dictionary with all group informations
         """
+        self.module.log("GlAuthBackendData::__group_data()")
+
         query = "select id, name, gidnumber from groups order by gidnumber"
 
         result, data, _ = self.__execute_query(query)
@@ -621,6 +648,8 @@ class GlAuthBackendData(object):
         """
           return a dictionary with a subset of user informations
         """
+        self.module.log("GlAuthBackendData::__user_data()")
+
         query = "select id, name, uidnumber from users order by uidnumber"
 
         result, data, _ = self.__execute_query(query)
@@ -630,6 +659,8 @@ class GlAuthBackendData(object):
     def __create_directory(self, dir):
         """
         """
+        self.module.log(f"GlAuthBackendData::__create_directory(dir: {dir})")
+
         try:
             os.makedirs(dir, exist_ok=True)
         except FileExistsError:
@@ -643,7 +674,7 @@ class GlAuthBackendData(object):
     def __checksum_file(self, checksum, checksum_file):
         """
         """
-        self.module.log(msg=f"    write checksum_file : '{checksum_file}'")
+        self.module.log(f"GlAuthBackendData::__checksum_file(checksum: {checksum}, checksum_file: {checksum_file})")
 
         with open(checksum_file, "w") as f:
             f.write(checksum)
@@ -653,6 +684,8 @@ class GlAuthBackendData(object):
     def __read_checksum_file(self, checksum_file):
         """
         """
+        self.module.log(f"GlAuthBackendData::__read_checksum_file(checksum_file: {checksum_file})")
+
         if os.path.exists(checksum_file):
             with open(checksum_file, "r") as f:
                 return f.readlines()[0]
