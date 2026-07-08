@@ -36,8 +36,9 @@
   ansible.builtin.file:
     path: "{{ glauth_data_dir }}"
     state: directory
+    owner: "{{ glauth_system_user }}"
     group: "{{ glauth_system_group }}"
-    mode: "0755"
+    mode: "0750"
 
 - name: detect binary file for glauth on '{{ glauth_delegate_to }}'
   become: false

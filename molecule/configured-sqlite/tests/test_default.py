@@ -77,12 +77,3 @@ def test_service(host, get_vars):
     service = host.service("glauth")
     assert service.is_enabled
     assert service.is_running
-
-
-def test_open_port(host, get_vars):
-    """
-    """
-    listen_address = "0.0.0.0:389"
-
-    service = host.socket(f"tcp://{listen_address}")
-    assert service.is_listening

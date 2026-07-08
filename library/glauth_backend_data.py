@@ -159,7 +159,7 @@ class GlAuthBackendData(object):
 
     def import_groups(self):
         """
-            CREATE TABLE IF NOT EXISTS groups (
+            CREATE TABLE IF NOT EXISTS ldapgroups (
               id INTEGER PRIMARY KEY,
               name TEXT NOT NULL,
               gidnumber INTEGER NOT NULL
@@ -176,13 +176,13 @@ class GlAuthBackendData(object):
             include_groups = values.get("include_groups", [])
 
             group_exists, error, existing_groupid, error_message = self.__check_database_value(
-                'groups', 'name', group)
+                'ldapgroups', 'name', group)
 
             if group_exists:
                 """
                   update
                 """
-                query = f"update groups set gidnumber = {gid} where name = '{group}'"
+                query = f"update ldapgroups set gidnumber = {gid} where name = '{group}'"
                 success, _, msg = self.__execute_query(query)
 
             else:
@@ -190,7 +190,7 @@ class GlAuthBackendData(object):
                   insert
                 """
                 # success, msg = self.__insert_user(user, values)
-                query = f"insert or replace into groups (`name`, `gidnumber`) values ('{group}', '{gid}')"
+                query = f"insert or replace into ldapgroups (`name`, `gidnumber`) values ('{group}', '{gid}')"
                 success, last_inserted_id, msg = self.__execute_query(query)
 
                 existing_groupid = last_inserted_id
@@ -350,6 +350,8 @@ class GlAuthBackendData(object):
 
         import sqlite3
 
+        existing_userid = 0
+
         try:
             conn = sqlite3.connect(
                 self.database_file,
@@ -364,8 +366,6 @@ class GlAuthBackendData(object):
 
             if isinstance(userid, list) and len(userid) > 0:
                 existing_userid = userid[0]
-            else:
-                existing_userid = 0
 
             if existing_userid == 0:
                 _exists = False
@@ -638,7 +638,7 @@ class GlAuthBackendData(object):
         """
         self.module.log("GlAuthBackendData::__group_data()")
 
-        query = "select id, name, gidnumber from groups order by gidnumber"
+        query = "select id, name, gidnumber from ldapgroups order by gidnumber"
 
         result, data, _ = self.__execute_query(query)
 

@@ -14,4 +14,19 @@
   when:
     - (glauth_users is defined and glauth_users | count > 0) or
       (glauth_groups is defined and glauth_groups | count > 0)
+
+# the database is created/seeded by the ansible modules above (running as the
+# remote user, usually root). the glauth service runs as '{{ glauth_system_user }}'
+# and must be able to WRITE the database file - otherwise the sqlite plugin
+# segfaults in CreateSchema (statement.Exec on a nil prepared statement).
+- name: ensure sqlite database is writable by the glauth service user
+  become: true
+  ansible.builtin.file:
+    path: "{{ glauth_data_dir }}/glauth.db"
+    state: file
+    owner: "{{ glauth_system_user }}"
+    group: "{{ glauth_system_group }}"
+    mode: "0640"
+  notify:
+    - restart glauth
 ...

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
   custattr TEXT DEFAULT '{}'
 );
 
-CREATE TABLE IF NOT EXISTS groups (
+CREATE TABLE IF NOT EXISTS ldapgroups (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   gidnumber INTEGER NOT NULL
@@ -44,6 +44,6 @@ CREATE TABLE IF NOT EXISTS capabilities (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_name on users(name, uidnumber);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_group_name on groups(name, gidnumber);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_group_name on ldapgroups(name, gidnumber);
 
 COMMIT;
