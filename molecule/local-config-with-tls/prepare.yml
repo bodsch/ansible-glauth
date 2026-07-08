@@ -40,6 +40,12 @@
       ansible.builtin.package:
         update_cache: true
 
+    - name: install dependencies
+      ansible.builtin.package:
+        name:
+          - iproute2
+        state: present
+
     - name: environment
       ansible.builtin.debug:
         msg:
@@ -47,6 +53,7 @@
           - "distribution version : {{ ansible_facts.distribution_major_version }}"
           - "ansible version      : {{ ansible_version.full }}"
           - "python version       : {{ ansible_facts.python.version.major }}.{{ ansible_facts.python.version.minor }}"
+
 
 - name: prepare snakeoil certificate
   hosts: all

@@ -140,6 +140,7 @@ jobs:
         scenario:
           - local-config
           - local-config-with-tls
+          - configured-sqlite
           - latest
           - "2.x"
           - "2.3.2"

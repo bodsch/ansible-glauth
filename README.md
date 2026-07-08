@@ -48,8 +48,8 @@ Tested on
 
 * Arch Linux
 * Debian based
-    - Debian 10 / 11
-    - Ubuntu 20.10
+    - Debian 12 / 13
+    - Ubuntu 24.04 / 26.04
 
 
 ## Contribution
@@ -65,10 +65,7 @@ If you want to use something stable, please use a [Tagged Version](https://githu
 ## Configuration
 
 ```yaml
-glauth_version: 2.1.0
-
-glauth_release_download_url: https://github.com/glauth/glauth/releases
-glauth_release_api_url: https://api.github.com/repos/glauth/glauth/releases
+glauth_version: 2.5.0
 
 glauth_system_user: glauth
 glauth_system_group: glauth
@@ -76,6 +73,13 @@ glauth_config_dir: /etc/glauth
 glauth_data_dir: /var/lib/glauth
 
 glauth_direct_download: false
+
+glauth_tls_certificate:
+  source_files:
+    cert: ""
+    key: ""
+
+glauth_release: {}
 
 glauth_service: {}
 
@@ -90,12 +94,24 @@ glauth_groups: {}
 glauth_behaviors: {}
 
 glauth_api: {}
+
+glauth_plugins: []
+  # - name: mysql
+  #   src: https://github.com/glauth/glauth-mysql/releases/download/v{{ glauth_version }}/mysql-linux-{{ system_architecture }}.so
+  #   dest: mysql.so
+  # - name: sqlite
+  #   src: https://github.com/glauth/glauth-sqlite/releases/download/v{{ glauth_version }}/sqlite-linux-{{ system_architecture }}.so
+  #   dest: sqlite.so
+  # - name: postgres
+  #   src: https://github.com/glauth/glauth-postgres/releases/download/v{{ glauth_version }}/postgres-linux-{{ system_architecture }}.so
+  #   dest: postgres.so
 ```
+
 ## Config for this role
 
 | parameter                    | type      | default                                      | description |
 | :---                         | :---      | :---                                         | :---        |
-| `glauth_version`             | `string`  | `2.1.0`                                      | The version of glauth to install. Use `latest` to install the latest release version, but use with caution. |
+| `glauth_version`             | `string`  | `2.5.0`                                      | The version of glauth to install. Use `latest` to install the latest release version, but use with caution. |
 | `glauth_system_user`         | `string`  | `glauth`                                     | User as which glauth shall run |
 | `glauth_system_group`        | `string`  | `glauth`                                     | Group as which glauth shall run |
 | `glauth_config_dir`          | `string`  | `/etc/glauth`                                | Directory with configuration for glauth |

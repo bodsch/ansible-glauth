@@ -28,7 +28,7 @@ class FilterModule(object):
     def release_version(self, data, version):
         """
         """
-        display.v(f"glauth::release_version(data: {data}, aversion: {version})")
+        display.vv(f"glauth::release_version(data: {data}, aversion: {version})")
 
         _VERSION_PATTERN = re.compile(r".*\/download\/(?P<version>.*)\/.*")
 
@@ -38,7 +38,7 @@ class FilterModule(object):
     def checksum(self, data, artefact, os, arch):
         """
         """
-        display.v(f"glauth::checksum(data: {data}, artefact: {artefact}, os: {os}, arch: {arch})")
+        display.vv(f"glauth::checksum(data: {data}, artefact: {artefact}, os: {os}, arch: {arch})")
 
         checksum = None
 
@@ -51,14 +51,14 @@ class FilterModule(object):
         if isinstance(checksum, str):
             checksum = checksum.split(" ")[0]
 
-        # display.v("= checksum: {}".format(checksum))
+        # display.vv("= checksum: {}".format(checksum))
 
         return checksum
 
     def plugins(self, data):
         """
         """
-        display.v(f"glauth::plugins(data: {data})")
+        display.vv(f"glauth::plugins(data: {data})")
 
         result = []
 
@@ -75,7 +75,7 @@ class FilterModule(object):
     def support_tls(self, data):
         """
         """
-        display.v(f"glauth::support_tls(data: {data})")
+        display.vv(f"glauth::support_tls(data: {data})")
 
         enabled = data.get("enabled", False)
 
@@ -90,7 +90,7 @@ class FilterModule(object):
     def tls_directory(self, data):
         """
         """
-        display.v(f"glauth::tls_directory(data: {data})")
+        display.vv(f"glauth::tls_directory(data: {data})")
 
         directory = []
 
@@ -110,7 +110,7 @@ class FilterModule(object):
         """
             This keeps only unique name in the list, not preserving the order though.
         """
-        display.v(f"glauth::combine_lists(data: {data}, configured: {configured}, release_version: {release_version})")
+        display.vv(f"glauth::combine_lists(data: {data}, configured: {configured}, release_version: {release_version})")
 
         result = list({x['name']: x for x in data + configured}.values())
 
@@ -120,6 +120,6 @@ class FilterModule(object):
                 for p in result
             ]
 
-        display.v(f"= {result}")
+        display.vv(f"= {result}")
 
         return result
