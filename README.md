@@ -3,6 +3,13 @@
 
 Ansible role to install and configure [glauth](https://github.com/glauth/glauth).
 
+---
+
+> I have moved this role to a [collection](https://github.com/bodsch/ansible-collection-auth).
+> Therefore, please do not process any further issues or merge requests **here**.  
+
+---
+
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/bodsch/ansible-glauth/main.yml?branch=main)][ci]
 [![GitHub issues](https://img.shields.io/github/issues/bodsch/ansible-glauth)][issues]
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/bodsch/ansible-glauth)][releases]
